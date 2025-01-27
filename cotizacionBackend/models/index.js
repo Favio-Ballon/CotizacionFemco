@@ -1,0 +1,95 @@
+const dbConfig = require('../config/db.config.js')
+const Sequelize = require('sequelize')
+const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
+    host: dbConfig.HOST,
+    port: dbConfig.PORT,
+    dialect: 'mysql'
+})
+
+const db = {}
+db.Sequelize = Sequelize
+db.sequelize = sequelize
+
+db.producto = require('./producto.js')(sequelize, Sequelize)
+db.grupo = require('./grupo.js')(sequelize, Sequelize)
+db.modelo = require('./modelo.js')(sequelize, Sequelize)
+db.usuario = require('./usuario.js')(sequelize, Sequelize)
+db.cotizacion = require('./cotizacion.js')(sequelize, Sequelize)
+
+//producto tiene modelo
+db.producto.belongsTo(db.modelo, {
+    as: 'modelo',
+    foreignKey: 'modeloId'
+})
+db.modelo.hasMany(db.producto, {
+    as: 'productos',
+    foreignKey: 'modeloId'
+})
+
+//producto puede estar en n grupos y viceversa
+db.producto.belongsToMany(db.grupo, {
+    through: 'producto_grupo',
+    as: 'grupos',
+    foreignKey: 'catalogo'
+})
+db.grupo.belongsToMany(db.producto, {
+    through: 'producto_grupo',
+    as: 'productos',
+    foreignKey: 'grupoId'
+})
+
+const ProductoCotizacion = require('./productoCotizacion')(sequelize, Sequelize)
+
+//producto tiene cotizaciones
+db.producto.belongsToMany(db.cotizacion, {
+    through: ProductoCotizacion,
+    as: 'cotizaciones',
+    foreignKey: 'productoId'
+})
+db.cotizacion.belongsToMany(db.producto, {
+    through: ProductoCotizacion,
+    as: 'productos',
+    foreignKey: 'cotizacionId'
+})
+
+//usuario tiene cotizaciones
+db.usuario.hasMany(db.cotizacion, {
+    as: 'cotizaciones',
+    foreignKey: 'usuarioId'
+})
+db.cotizacion.belongsTo(db.usuario, {
+    as: 'usuario',
+    foreignKey: 'usuarioId'
+})
+
+//usuario puede crear productos, pero hay productos que no tienen usuarios
+db.usuario.hasMany(db.producto, {
+    as: 'productos',
+    foreignKey: 'usuarioId'
+})
+db.producto.belongsTo(db.usuario, {
+    as: 'usuario',
+    foreignKey: 'usuarioId'
+})
+
+//usuario puede crear modelos, pero hay modelos que no tienen usuarios
+db.usuario.hasMany(db.modelo, {
+    as: 'modelos',
+    foreignKey: 'usuarioId'
+})
+db.modelo.belongsTo(db.usuario, {
+    as: 'usuario',
+    foreignKey: 'usuarioId'
+})
+
+//usuario puede crear grupos, pero hay grupos que no tienen usuarios
+db.usuario.hasMany(db.grupo, {
+    as: 'grupos',
+    foreignKey: 'usuarioId'
+})
+db.grupo.belongsTo(db.usuario, {
+    as: 'usuario',
+    foreignKey: 'usuarioId'
+})
+
+module.exports = db
