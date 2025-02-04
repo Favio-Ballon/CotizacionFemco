@@ -22,8 +22,21 @@ module.exports = (sequelize, Sequelize) => {
         transporte: {
             type: Sequelize.BOOLEAN
         },
-        pdf: {
+        referencia: {
+            type: Sequelize.STRING,
+            nullable: false
+        },
+        observaciones: {
             type: Sequelize.STRING
+        },
+        imagen: {
+            type: Sequelize.STRING
+        },
+        subtotal: {
+            type: Sequelize.DOUBLE
+        },
+        agregado: {
+            type: Sequelize.DOUBLE
         }
     })
     return Cotizacion

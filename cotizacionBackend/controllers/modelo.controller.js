@@ -3,9 +3,7 @@ const { isRequestValid } = require('../utils/request.utils')
 
 exports.listModelo = (req, res) => {
     db.modelo
-        .findAll({
-            include: 'productos'
-        })
+        .findAll()
         .then((data) => {
             res.send(data)
         })

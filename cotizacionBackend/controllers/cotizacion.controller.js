@@ -21,7 +21,12 @@ exports.listCotizacionById = (req, res) => {
 
     db.cotizacion
         .findByPk(id, {
-            include: 'productos'
+            include: [
+                {
+                    association: 'productos',
+                    include: ['modelo']
+                }
+            ]
         })
         .then((data) => {
             if (data) {
@@ -42,12 +47,15 @@ exports.listCotizacionById = (req, res) => {
 }
 
 exports.createCotizacion = async (req, res) => {
+    console.log(req.body)
     const requiredFields = [
         'nombre',
+        'referencia',
         'total',
+        'subtotal',
+        'formaPago',
         'tiempoEntrega',
-        'transporte',
-        'productos'
+        'productos',
     ]
 
     if (!isRequestValid(requiredFields, req.body, res)) {
@@ -62,9 +70,13 @@ exports.createCotizacion = async (req, res) => {
         total: req.body.total,
         fecha: fechaToday,
         descuento: req.body.descuento ?? 0,
-        formaPago: req.body.formaPago ?? 'credito',
-        tiempoEntrega: req.body.tiempoEntrega ?? 'credito',
-        transporte: req.body.transporte
+        formaPago: req.body.formaPago ?? '100',
+        tiempoEntrega: req.body.tiempoEntrega ?? '3-5',
+        transporte: req.body.transporte ?? false,
+        referencia: req.body.referencia,
+        observaciones: req.body.observaciones ?? '',
+        agregado: req.body.agregado ?? 0,
+        subtotal: req.body.subtotal,
     }
 
     try {
@@ -87,13 +99,16 @@ exports.updateCotizacion = async (req, res) => {
 
     const requiredFields = [
         'nombre',
+        'referencia',
         'total',
+        'subtotal',
+        'formaPago',
         'tiempoEntrega',
-        'transporte',
-        'productos'
+        'productos',
     ]
 
     if (!isRequestValid(requiredFields, req.body, res)) {
+        console.log('invalid request')
         return
     }
 
@@ -108,10 +123,15 @@ exports.updateCotizacion = async (req, res) => {
         }
         cotizacion.nombre = req.body.nombre
         cotizacion.total = req.body.total
-        cotizacion.descuento = req.body.descuento
+        cotizacion.descuento = req.body.descuento ?? 0
         cotizacion.formaPago = req.body.formaPago
         cotizacion.tiempoEntrega = req.body.tiempoEntrega
-        cotizacion.transporte = req.body.transporte
+        cotizacion.transporte = req.body.transporte ?? false
+        cotizacion.referencia = req.body.referencia
+        cotizacion.observaciones = req.body.observaciones ?? ''
+        cotizacion.agregado = req.body.agregado ?? 0
+        cotizacion.subtotal = req.body.subtotal
+
 
         await cotizacion.save()
 
@@ -169,5 +189,3 @@ async function updateProductos(cotizacionId, productoIds) {
         })
     })
 }
-
-

@@ -7,6 +7,7 @@ module.exports = {
             }
         }
         if (missingFields.length > 0) {
+            console.log('Faltan campos:', missingFields)
             res.status(400).json({
                 msg: `Faltan los campos: ${missingFields.join(', ')}`
             })

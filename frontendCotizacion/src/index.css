@@ -3,7 +3,16 @@
 @tailwind utilities;
 
 @media print {
-  .no-print {
-    display: none;
+  @page {
+    margin: 0; /* Eliminar márgenes para evitar encabezados y pies */
   }
+
+  body {
+    margin: 0; /* Asegúrate de que el contenido no tenga márgenes */
+  }
+
+  .print:hidden {
+    display: none; /* Ocultar elementos específicos como el botón "Print" */
+  }
+
 }

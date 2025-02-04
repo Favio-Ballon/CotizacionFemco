@@ -8,12 +8,14 @@ import {
   FiArchive,
   FiInfo,
 } from "react-icons/fi";
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [activeLink, setActiveLink] = useState("cotizar");
   const [showText, setShowText] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleResize = () => {
@@ -24,6 +26,19 @@ const Sidebar = () => {
 
     window.addEventListener("resize", handleResize);
     handleResize();
+
+    //check the link to set the active link
+    const path = window.location.pathname;
+    if (path.includes("cotizar") || path.includes("cotizacion")) {
+      setActiveLink("cotizar");
+    } else if (path.includes("productos")) {
+      setActiveLink("productos");
+    } else if (path.includes("cotizaciones")) {
+      setActiveLink("cotizaciones");
+    } else if (path.includes("dashboard")) {
+      setActiveLink("dashboard");
+    }
+
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -36,6 +51,7 @@ const Sidebar = () => {
       setShowText(false);
     }
   }, [isExpanded]);
+  
 
   const navigationItems = useMemo(
     () => [
@@ -53,7 +69,10 @@ const Sidebar = () => {
         className={`flex items-center cursor-pointer px-3 py-2 my-2 rounded-lg transition-all duration-300 ${
           isExpanded ? "" : "justify-center"
         } ${activeLink === id ? "bg-gray-700" : "hover:bg-gray-700"}`}
-        onClick={() => setActiveLink(id)}
+        onClick={() => {
+          setActiveLink(id);
+          navigate(`/${id}`);
+        }}
         role="button"
         tabIndex={0}
         aria-label={label}

@@ -11,5 +11,7 @@ module.exports = (app) => {
     router.put('/:id', controller.updateProducto)
     router.delete('/:id', controller.deleteProducto)
 
+    router.post('/create', controller.createProductoWeb)
+
     app.use('/producto', router)
 }

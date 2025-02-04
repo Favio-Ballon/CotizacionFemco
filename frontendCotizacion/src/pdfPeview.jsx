@@ -1,86 +1,170 @@
-import React, { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaPrint } from "react-icons/fa";
 import { format } from "date-fns";
+import html2pdf from "html2pdf.js";
+import { useParams } from "react-router-dom";
 
 const QuotationDocument = () => {
   const [currentDate] = useState(new Date());
+  const quotationRef = useRef(null); // Ref to capture the HTML content
+  const { id } = useParams();
 
-  const companyDetails = {
+  const [companyDetails, setCompanyDetails] = useState({
     name: "FEMCO",
     address: "123 Business Avenue, La Paz, Bolivia",
-    email: "contact@femco.com",
-    phone: "+591 2 1234567"
-  };
+    email: "",
+    phone: "",
+  });
 
-  const clientInfo = {
-    name: "John Smith Industries",
-    location: "Santa Cruz, Bolivia",
-    quotedBy: "Carlos Rodriguez"
-  };
+  const [clientInfo, setClientInfo] = useState({
+    name: "",
+    location: "",
+    quotedBy: "",
+  });
 
-  const products = [
-    {
-      itemNo: "001",
-      catalogNo: "CAT-2024-001",
-      model: "Industrial Pump X100",
-      description: "High-performance industrial water pump",
-      quantity: 2,
-      unitPrice: 1500.00,
-      totalPrice: 3000.00
-    },
-    {
-      itemNo: "002",
-      catalogNo: "CAT-2024-002",
-      model: "Filter System Pro",
-      description: "Advanced filtration system with dual cores",
-      quantity: 1,
-      unitPrice: 2500.00,
-      totalPrice: 2500.00
+  const [products, setProducts] = useState([]);
+
+  const [imagen, setImagen] = useState();
+
+  const [conditions, setConditions] = useState([
+    "Precios expresados en bolivianos incluyen todos los Impuestos de Ley",
+    "Tiempo de entrega de 3-5 dias",
+    "Forma de pago: 100% para pedido",
+    "Validez de la oferta: 7 días",
+    "No incluye transporte",
+  ]);
+
+  const [extras, setExtras] = useState({});
+
+  useEffect(() => {
+    getDatosCotizacion();
+  }, [id]);
+
+  const getDatosCotizacion = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/cotizacion/${id}`);
+      const data = await response.json();
+      setClientInfo({
+        name: data.nombre,
+        location: "Santa Cruz",
+        quotedBy: "Eliana",
+      });
+
+      // product may be a single item or an array of items
+      var products = [];
+      var index = 0;
+      for (const product of data.productos) {
+        index += 1;
+        products.push({
+          itemNo: index,
+          catalogNo: product.catalogo,
+          model: product.modelo.nombre,
+          description: product.nombre,
+          quantity: product.producto_cotizacion.cantidad,
+          unitPrice: product.precio,
+          totalPrice: product.precio * product.producto_cotizacion.cantidad,
+        });
+      }
+
+      setProducts(products);
+
+      setCompanyDetails({
+        name: "FEMCO",
+        address: "123 Business Avenue, La Paz, Bolivia",
+        email: "",
+        phone: "",
+      });
+
+      var formaPago = "";
+      switch (data.formaPago) {
+        case "100":
+          formaPago = "100% para pedido";
+          break;
+        case "50":
+          formaPago = "50% para pedido y 50% a la entrega";
+          break;
+        case "credito15":
+          formaPago = "15 días de crédito";
+          break;
+        case "credito30":
+          formaPago = "30 días de crédito";
+          break;
+        default:
+          formaPago = "100% para pedido";
+          break;
+      }
+
+      setConditions([
+        "Precios expresados en bolivianos incluyen todos los Impuestos de Ley",
+        data.tiempoEntrega === "inmediata"
+          ? "Tiempo de entrega inmediata"
+          : `Tiempo de entrega de ${data.tiempoEntrega} dias`,
+        "Forma de pago: " + formaPago,
+        "Validez de la oferta: 7 días",
+        data.transporte ? "Incluye transporte" : "No incluye transporte",
+      ]);
+
+      setExtras({
+        descuento: data.descuento,
+        agregado: data.agregado,
+        observaciones: data.observaciones,
+      });
+
+      setImagen(data.imagen ? data.imagen : "");
+
+      document.title = `Quotation - ${clientInfo.name}`;
+    } catch (error) {
+      console.error(error);
     }
-  ];
-
-  const conditions = [
-    "Prices quoted in Bolivianos (Bs.)",
-    "Delivery time: 15-20 working days",
-    "Payment terms: 50% advance, 50% before delivery",
-    "Offer valid for 30 days",
-    "Transportation not included in price"
-  ];
+  };
 
   const handlePrint = () => {
-    window.print();
+    const element = quotationRef.current; // Get the HTML content
+    const opt = {
+      margin: 0, // Set margin to 0 to remove white space
+      filename: `quotation_${format(currentDate, "yyyyMMdd")}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    };
+
+    // Generate and download the PDF
+    html2pdf().from(element).set(opt).save();
   };
 
   const HeaderComponent = () => (
-    <div className="bg-[#1b1464] text-white p-6 rounded-t-lg">
+    <div className="bg-[#1b1464] text-white p-6 print:bg-[#1b1464] print:text-white">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold mb-2">{companyDetails.name}</h1>
           <div className="text-sm space-y-1">
             <p>{companyDetails.address}</p>
             <p>Email: {companyDetails.email}</p>
-            <p>Phone: {companyDetails.phone}</p>
+            <p>Telefono: {companyDetails.phone}</p>
           </div>
         </div>
         <div className="text-right">
-          <h2 className="text-2xl font-semibold">QUOTATION</h2>
-          <p className="text-sm mt-2">#{Math.floor(Math.random() * 10000).toString().padStart(4, "0")}</p>
+          <h2 className="text-2xl font-semibold">Cotizacion</h2>
+          <p className="text-xl mt-2">#{id}</p>
         </div>
       </div>
     </div>
   );
 
   const ClientInfoComponent = () => (
-    <div className="bg-gray-50 p-6 border-b">
+    <div className="bg-gray-50 p-6 border-b print:bg-gray-50">
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <h3 className="font-semibold mb-2">Client Information</h3>
-          <p className="text-gray-700">Name: {clientInfo.name}</p>
-          <p className="text-gray-700">Location: {clientInfo.location}</p>
+        {/* center height */}
+        <div className="space-y-2 my-auto">
+          <h3 className="font-semibold mb-2 text-xl">
+            Cliente: {clientInfo.name}
+          </h3>
         </div>
         <div className="text-right">
-          <p className="text-gray-700">Date: {format(currentDate, "dd/MM/yyyy")}</p>
-          <p className="text-gray-700">Quoted By: {clientInfo.quotedBy}</p>
+          <p className="text-gray-700">
+            Fecha: {format(currentDate, "dd/MM/yyyy")}
+          </p>
+          <p className="text-gray-700">Cotizado por: {clientInfo.quotedBy}</p>
         </div>
       </div>
     </div>
@@ -90,26 +174,34 @@ const QuotationDocument = () => {
     <div className="p-6 overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-gray-100">
-            <th className="p-3 text-left">Item No.</th>
-            <th className="p-3 text-left">Catalog No.</th>
-            <th className="p-3 text-left">Model</th>
-            <th className="p-3 text-left">Description</th>
-            <th className="p-3 text-right">Quantity</th>
-            <th className="p-3 text-right">Unit Price (Bs.)</th>
-            <th className="p-3 text-right">Total Price (Bs.)</th>
+          <tr className="bg-gray-100 print:bg-gray-100">
+            <th className="p-3 text-left">Ítem</th>
+            <th className="p-3 text-left">Catálogo</th>
+            <th className="p-3 text-left">Modelo</th>
+            <th className="p-3 text-left">Descripción</th>
+            <th className="p-3 text-right">Cantidad</th>
+            <th className="p-3 text-right">Precio Unitario (Bs.)</th>
+            <th className="p-3 text-right">Total (Bs.)</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="bg-white divide-y divide-gray-200">
           {products.map((product) => (
-            <tr key={product.itemNo} className="border-b hover:bg-gray-50 transition-colors">
+            <tr
+              key={product.itemNo}
+              className="border-b hover:bg-gray-50 transition-colors print:border-b"
+              style={{ pageBreakInside: "avoid" }}
+            >
               <td className="p-3">{product.itemNo}</td>
               <td className="p-3">{product.catalogNo}</td>
               <td className="p-3">{product.model}</td>
-              <td className="p-3">{product.description}</td>
+              <td className="px-2 py-4 whitespace-wrap break-words max-w-[200px]">
+                {product.description}
+              </td>
               <td className="p-3 text-right">{product.quantity}</td>
               <td className="p-3 text-right">{product.unitPrice.toFixed(2)}</td>
-              <td className="p-3 text-right">{product.totalPrice.toFixed(2)}</td>
+              <td className="p-3 text-right">
+                {product.totalPrice.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -118,46 +210,144 @@ const QuotationDocument = () => {
   );
 
   const TotalComponent = () => {
-    const total = products.reduce((sum, product) => sum + product.totalPrice, 0);
+    const subtotal = products.reduce(
+      (sum, product) => sum + product.totalPrice,
+      0
+    );
+    const descuento = (subtotal * extras.descuento) / 100;
+    const agregado = (subtotal * extras.agregado) / 100;
+    const total = subtotal + agregado - descuento;
     return (
-      <div className="p-6 bg-gray-50">
-        <div className="flex justify-end items-center">
-          <div className="text-right">
-            <p className="text-lg font-semibold">Total Amount:</p>
-            <p className="text-3xl font-bold text-[#1b1464]">Bs. {total.toFixed(2)}</p>
+      <div
+        style={{ pageBreakInside: "avoid" }}
+        className="p-6 bg-gray-50 print:bg-gray-50"
+      >
+        <div className="flex-column justify-end items-center">
+          {extras.descuento > 0 && (
+            <>
+              <div className="flex justify-end">
+                <p className="text-mg font-semibold pr-2">Subtotal:</p>
+                <p className="text-mg font-bold text-[#1b1464] print:text-[#1b1464]">
+                  {total.toFixed(2)} Bs.
+                </p>
+              </div>
+
+              <div className="flex justify-end">
+                <p className="text-mg font-semibold pr-2">Descuento:</p>
+                <p className="text-mg font-bold text-[#1b1464] print:text-[#1b1464]">
+                  {descuento.toFixed(2)} Bs. ({extras.descuento}%)
+                </p>
+              </div>
+            </>
+          )}
+          <div className="flex justify-end">
+            <p className="text-xl font-semibold pr-2 my-auto">Total:</p>
+            <p className="text-3xl font-bold text-[#1b1464] print:text-[#1b1464]">
+              {total.toFixed(2)} Bs.
+            </p>
           </div>
         </div>
       </div>
     );
   };
 
+  const observacionesComponent = () => (
+    <div
+      className="p-6 bg-white print:bg-white force-new-page grid  grid-cols-2"
+      style={{ pageBreakInside: "avoid" }}
+    >
+      <div className="col-span-1">
+        <h3 className="font-semibold mb-4">OBSERVACIONES</h3>
+        <p className="text-gray-700">{extras.observaciones}</p>
+      </div>
+    </div>
+  );
+
   const ConditionsComponent = () => (
-    <div className="p-6 bg-white">
-      <h3 className="font-semibold mb-4">Terms and Conditions</h3>
-      <ul className="list-disc list-inside space-y-2 text-gray-700">
-        {conditions.map((condition, index) => (
-          <li key={index}>{condition}</li>
-        ))}
-      </ul>
+    <div
+      className="p-6 bg-white print:bg-white force-new-page grid  grid-cols-2"
+      style={{ pageBreakInside: "avoid" }} // Avoid breaking inside this section
+    >
+      <div className="col-span-1">
+        <h3 className="font-semibold mb-4">CONDICIONES GENERALES DE VENTA</h3>
+        <ul className="list-disc list-inside space-y-2 text-gray-700">
+          {conditions.map((condition, index) => (
+            <li className="whitespace-wrap" key={index}>
+              {condition}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* firma a la derecha */}
+      <div className="flex justify-end mt-8 col-span-1">
+        {/* image */}
+        <div className=" w-1/2 mr-4">
+          <img
+            src={
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Firma_de_Harold.jpg/621px-Firma_de_Harold.jpg"
+            }
+            alt="firma"
+            className="h-40 w-50 m-auto"
+          />
+          <p className=" border-t text-center text-gray-700 ml-4 mt-0">
+            {clientInfo.quotedBy}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+  const FooterComponent = () => (
+    <div
+      className="flex justify-center items-center print:bg-white"
+      style={{ height: "40.33vh" }} // Altura definida como 1/3 de la página
+    >
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7Z0lxKEU6huhHGqYsk_JZp0RstgGz2DZOww&s"
+        alt="Locker"
+        className="h-full object-contain" // Imagen ajustada al tamaño del contenedor
+      />
     </div>
   );
 
   return (
     <div className="max-w-5xl mx-auto my-8 bg-white rounded-lg shadow-lg print:shadow-none">
+      <style>
+        {`
+          @media print {
+            @page {
+              size: A4;
+              margin: 0; /* Remove page margin */
+            }
+            body {
+              margin: 0; /* Remove body margin */
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .force-new-page {
+              page-break-before: always; /* Force a new page before this element */
+            }
+          }
+        `}
+      </style>
       <div className="print:hidden mb-4 flex justify-end">
         <button
           onClick={handlePrint}
           className="bg-[#1b1464] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-opacity-90 transition-colors"
         >
           <FaPrint />
-          Print Document
+          Download PDF
         </button>
       </div>
-      <HeaderComponent />
-      <ClientInfoComponent />
-      <ProductTableComponent />
-      <TotalComponent />
-      <ConditionsComponent />
+      <div ref={quotationRef}>
+        <HeaderComponent />
+        <ClientInfoComponent />
+        <ProductTableComponent />
+        <TotalComponent />
+        {extras.observaciones && observacionesComponent()}
+        <ConditionsComponent />
+        {imagen && <FooterComponent />}
+      </div>
     </div>
   );
 };

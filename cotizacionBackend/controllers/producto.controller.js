@@ -3,7 +3,9 @@ const { isRequestValid } = require('../utils/request.utils')
 
 exports.listProducto = (req, res) => {
     db.producto
-        .findAll()
+        .findAll({
+            include: 'modelo'
+        })
         .then((data) => {
             res.send(data)
         })
@@ -80,7 +82,7 @@ exports.updateProducto = async (req, res) => {
 
     if (!producto) {
         res.status(404).send({
-            message: `No se encontró el producto con id ${id}.`
+            message: `No se encontró el producto con id ${catalogo}.`
         })
         return
     }
@@ -131,4 +133,57 @@ exports.deleteProducto = async (req, res) => {
         })
 }
 
+exports.createProductoWeb = async (req, res) => {
+    const requiredFields = ['catalogo', 'nombre', 'precio', 'modelo']
 
+    if (!isRequestValid(requiredFields, req.body, res)) {
+        return
+    }
+
+    // Buscar modelo it doesnt matter if it is a new model or an existing one, and isnt case sensitive
+    const modeloId = await db.modelo.findOne({
+        where: {
+            nombre: req.body.modelo
+        }
+    })
+
+    if (!modeloId) {
+        //create new model
+        const modelo = {
+            nombre: req.body.modelo,
+            unidad: 'pzs'
+        }
+
+        const newModelo = await db.modelo.create(modelo)
+        req.body.modeloId = newModelo.id
+    } else {
+        req.body.modeloId = modeloId.id
+    }
+
+    const producto = {
+        catalogo: req.body.catalogo,
+        nombre: req.body.nombre,
+        precio: req.body.precio,
+        modeloId: req.body.modeloId,
+        usuarioId: req.body.usuarioId ?? null,
+        esTemporal: req.body.esTemporal ?? false
+    }
+
+    db.producto
+        .create(producto)
+        .then((data) => {
+            //devolver con modelo
+            db.producto
+                .findByPk(data.catalogo, {
+                    include: 'modelo'
+                })
+                .then((data) => {
+                    res.send(data)
+                })
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: err.message || 'Ocurrió un error al crear el producto.'
+            })
+        })
+}
