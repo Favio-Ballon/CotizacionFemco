@@ -156,21 +156,59 @@ const ProductCatalog = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (selectedProduct) {
-      setProducts(
-        products.map((p) =>
-          p.catalogo === selectedProduct.catalogo ? formData : p
-        )
-      );
-    } else {
-      //endpoint localhost:3000/producto/create
-  
       const producto = {
         catalogo: formData.catalogo,
         nombre: formData.nombre,
         precio: formData.precio,
         modelo: formData.modelo,
       };
-  
+      try {
+        const response = await fetch(
+          `http://localhost:3000/producto/update/${selectedProduct.catalogo}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(producto),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json().catch(() => {
+            throw new Error("Invalid JSON response");
+          });
+
+          const updatedProducts = products.map((p) =>
+            p.catalogo === selectedProduct.catalogo ? data : p
+          );
+
+          setProducts(updatedProducts);
+
+          console.log("Product updated successfully");
+
+          //actualizar producto en sessionStorage
+          const storedData = JSON.parse(sessionStorage.getItem("productoData"));
+          const newData = storedData.map((p) =>
+            p.catalogo === selectedProduct.catalogo ? data : p
+          );
+          sessionStorage.setItem("productoData", JSON.stringify(newData));
+        } else {
+          console.error("Error updating product");
+        }
+      } catch (error) {
+        console.error("Error fetching and storing data:", error);
+      }
+    } else {
+      //endpoint localhost:3000/producto/create
+
+      const producto = {
+        catalogo: formData.catalogo,
+        nombre: formData.nombre,
+        precio: formData.precio,
+        modelo: formData.modelo,
+      };
+
       try {
         const response = await fetch("http://localhost:3000/producto/create", {
           method: "POST",
@@ -179,12 +217,12 @@ const ProductCatalog = () => {
           },
           body: JSON.stringify(producto),
         });
-  
+
         if (response.ok) {
           const data = await response.json().catch(() => {
             throw new Error("Invalid JSON response");
           });
-  
+
           //organize products by catalogo in ascending order
           const newProducts = [
             ...products,
@@ -192,18 +230,19 @@ const ProductCatalog = () => {
               catalogo: data.catalogo,
               nombre: data.nombre,
               precio: data.precio,
-              modelo: data.modelo?.nombre,
+              modelo: data.modelo,
             },
           ];
-  
+
           newProducts.sort((a, b) => a.catalogo - b.catalogo);
-  
+
           setProducts(newProducts);
-  
+
           console.log("Product added successfully");
-  
+
           //agregar producto a sessionStorage
-          const storedData = JSON.parse(sessionStorage.getItem("productoData")) || [];
+          const storedData =
+            JSON.parse(sessionStorage.getItem("productoData")) || [];
           const newData = [...storedData, data];
           //organize newData by catalogo in ascending order
           newData.sort((a, b) => a.catalogo - b.catalogo);

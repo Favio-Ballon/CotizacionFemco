@@ -187,3 +187,66 @@ exports.createProductoWeb = async (req, res) => {
             })
         })
 }
+
+exports.updateProductoWeb = async (req, res) => {
+    const catalogo = req.params.id
+
+    const requiredFields = ['nombre', 'precio', 'modelo']
+
+    if (!isRequestValid(requiredFields, req.body, res)) {
+        return
+    }
+
+    const producto = await db.producto.findByPk(catalogo)
+
+    if (!producto) {
+        res.status(404).send({
+            message: `No se encontró el producto con id ${catalogo}.`
+        })
+        return
+    }
+
+    // Buscar modelo it doesnt matter if it is a new model or an existing one, and isnt case sensitive
+    const modeloId = await db.modelo.findOne({
+        where: {
+            nombre: req.body.modelo
+        }
+    })
+
+    if (!modeloId) {
+        //create new model
+        const modelo = {
+            nombre: req.body.modelo,
+            unidad: 'pzs'
+        }
+
+        const newModelo = await db.modelo.create(modelo)
+        req.body.modeloId = newModelo.id
+    } else {
+        req.body.modeloId = modeloId.id
+    }
+
+    producto.nombre = req.body.nombre
+    producto.precio = req.body.precio
+    producto.modeloId = req.body.modeloId
+
+    producto
+        .save()
+        .then((data) => {
+            //devolver con modelo
+            db.producto
+                .findByPk(data.catalogo, {
+                    include: 'modelo'
+                })
+                .then((data) => {
+                    res.send(data)
+                })
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                    err.message ||
+                    `Ocurrió un error al actualizar el producto con id ${id}.`
+            })
+        })
+}
