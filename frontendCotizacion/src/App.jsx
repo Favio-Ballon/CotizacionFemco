@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FaTrash, FaEdit, FaPrint, FaSave, FaPlus } from "react-icons/fa";
-import Sidebar from "./components/sidebar";
+import ProductInputModal from "./components/cotizar/overlayProductoTemporal";
+import { set } from "date-fns";
 
 const QuotationForm = () => {
+  const Navigate = useNavigate();
   const { id } = useParams();
   const [customerInfo, setCustomerInfo] = useState({
     name: "",
@@ -15,7 +17,7 @@ const QuotationForm = () => {
     modelo: "",
     producto: "",
     cantidad: "",
-    precio: "",
+    price: "",
   });
 
   const [products, setProducts] = useState([]);
@@ -32,6 +34,9 @@ const QuotationForm = () => {
     imagen: null,
     transporte: false,
   });
+  const [productTemporal, setProductTemporal] = useState(null);
+  const [modalProductoTemporal, setModalProductoTemporal] = useState(false);
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
 
   useEffect(() => {
     checkModeloInSession();
@@ -42,7 +47,7 @@ const QuotationForm = () => {
     checkModeloInSession();
     checkProductoInSession();
     if (id !== "new" && isNaN(Number(id))) {
-      console.error("Invalid ID parameter");
+      // console.error("Invalid ID parameter");
       // Handle invalid ID, e.g., redirect or show an error message
       return;
     } else if (id === "new") {
@@ -55,7 +60,8 @@ const QuotationForm = () => {
   }, [id]);
 
   useEffect(() => {
-    if (id !== "new") {
+    //id no es new y es un numero
+    if (id !== "new" && !isNaN(Number(id))) {
       // Fetch the quotation data from the server
       fetchQuotationData(id);
     }
@@ -214,7 +220,10 @@ const QuotationForm = () => {
         return;
       }
 
-      setProducts([...products, { ...productEntry, id: Date.now() }]);
+      setProducts([
+        ...products,
+        { ...productEntry, id: Date.now(), isTemporal: false },
+      ]);
       setProductEntry({ modelo: "", producto: "", cantidad: "", price: "" });
       setSeleccionarProducto([]);
       setErrors({});
@@ -227,6 +236,12 @@ const QuotationForm = () => {
 
   const handleEditProduct = (catalogo) => {
     const producto = products.find((p) => p.catalogo === catalogo);
+    if (producto.isTemporal) {
+      setProductTemporal(producto);
+      handleRemoveProduct(catalogo);
+      setModalProductoTemporal(true);
+      return;
+    }
     setProductEntry(producto);
     handleRemoveProduct(catalogo);
 
@@ -253,7 +268,6 @@ const QuotationForm = () => {
       setErrors({ catalogo: "Catalogo no encontrado" });
       return;
     } else if (producto) {
-
       setProductEntry({
         ...productEntry,
         catalogo: producto.catalogo,
@@ -328,6 +342,14 @@ const QuotationForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleImage = (e) => {
+    console.log(e.target.files[0]);
+    setOptionalDetails({
+      ...optionalDetails,
+      imagen: e.target.files[0],
+    });
+  };
+
   const handleGuardarCotizacion = async () => {
     if (!validateGuardarCotizacion()) {
       return;
@@ -349,16 +371,58 @@ const QuotationForm = () => {
     };
 
     //add products to cotizacion first catalogo then quantity like [1,2]
-    products.forEach((producto) => {
-      cotizacion.productos.push([producto.catalogo, producto.cantidad]);
-    });
+    await Promise.all(
+      products.map(async (producto) => {
+        //Se crea los productos temporales
+        if (Array.isArray(products)) {
+          if (producto.isTemporal) {
+            await fetch("http://localhost:3000/producto/temporal", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                nombre: producto.producto || "",
+                modelo: producto.modelo || "",
+                precio: producto.price || "",
+              }),
+            })
+              .then(async (response) => {
+                if (!response.ok) {
+                  console.log(producto);
+                  throw new Error("Failed to create product");
+                } else {
+                  console.log("Producto temporal creado exitosamente");
+                  const data = await response.json();
+                  producto.catalogo = data.catalogo;
+                  producto.isTemporal = false;
+                  console.log(producto);
+                  cotizacion.productos.push([
+                    producto.catalogo,
+                    producto.cantidad,
+                  ]);
+                }
+              })
+              .catch((error) => {
+                console.error("Error creating product:", error);
+              });
+          } else {
+            console.log(producto.catalogo);
+            cotizacion.productos.push([producto.catalogo, producto.cantidad]);
+          }
+        } else {
+          console.error("products is not an array or is undefined");
+        }
+      })
+    );
+    handleCotizacion(cotizacion);
+  };
 
-    console.log(cotizacion);
-
+  const handleCotizacion = async (cotizacion) => {
     var link;
     var method;
 
-    if (id !== "new") {
+    if (id !== "new" && !isNaN(Number(id))) {
       link = `http://localhost:3000/cotizacion/${id}`;
       method = "PUT";
     } else {
@@ -379,22 +443,57 @@ const QuotationForm = () => {
       const data = await response.json();
       console.log("Cotizacion guardada exitosamente");
       console.log(data);
+      if (optionalDetails.imagen) {
+        console.log("entrp a imagen");
+        const formData = new FormData();
+        formData.append("imagen", optionalDetails.imagen);
+        const response = await fetch(
+          `http://localhost:3000/cotizacion/upload/${data.id}`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+        if (response.ok) {
+          console.log("Imagen guardada exitosamente");
+        } else {
+          console.error("Error saving image");
+        }
+      }
       alert("Cotizacion guardada exitosamente");
       setProducts([]);
       setDiscount(0);
-      window.location.href = `/cotizacion/${data.id}/preview`;
+      Navigate(`/cotizacion/${data.id}`);
+      window.location.reload();
     }
 
     console.log(response);
   };
 
   const handleImprimirCotizacion = () => {
-    window.location.href = `/cotizacion/${id}/preview`;
+    Navigate(`/cotizacion/${id}/preview`);
+  };
+
+  const handleResetForm = () => {
+    setCustomerInfo({ name: "", reference: "" });
+    setProductEntry({ catalogo: "", modelo: "", cantidad: "" });
+    setOptionalDetails({
+      tiempoEntrega: "",
+      formaPago: "",
+      observaciones: "",
+      transporte: false,
+    });
+    setProducts([]);
+    setDiscount(0);
+    setAgregado(0);
+    setErrors({});
+    setSeleccionarProducto([]);
+    setIsClearModalOpen(false);
+    Navigate("/cotizacion/new");
   };
 
   return (
     <>
-      <Sidebar />
       <div className="min-h-screen lg:ml-20 bg-gray-100 p-6">
         <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-lg">
           <div className="p-6 grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -538,18 +637,27 @@ const QuotationForm = () => {
                     </p>
                   )}
                 </div>
-                <button
-                  onClick={handleAddProduct}
-                  className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center justify-center gap-2"
-                >
-                  <FaPlus /> Add Producto
-                </button>
+                <div>
+                  <button
+                    onClick={handleAddProduct}
+                    className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center justify-center gap-2"
+                  >
+                    <FaPlus /> Añadir producto
+                  </button>
+                  <button
+                    onClick={() => setModalProductoTemporal(true)}
+                    className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center justify-center gap-2 mt-2"
+                  >
+                    <FaPlus /> Añadir producto temporal
+                  </button>
+                </div>
                 {errors.duplicate && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.duplicate}
                   </p>
                 )}
               </div>
+              {/* Detalles opcionales */}
               <div className="lg:col-span-2 space-y-6">
                 <h2 className="text-2xl font-bold text-gray-800">
                   Detalles Opcionales
@@ -620,12 +728,7 @@ const QuotationForm = () => {
                       type="file"
                       accept="image/*"
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      onChange={(e) =>
-                        setOptionalDetails({
-                          ...optionalDetails,
-                          imagen: e.target.files[0],
-                        })
-                      }
+                      onChange={(e) => handleImage(e)}
                     />
                   </div>
                   <div className="flex items-center gap-2">
@@ -785,11 +888,80 @@ const QuotationForm = () => {
                 >
                   <FaPrint /> Imprimir Cotizacion
                 </button>
+                <button
+                  className="flex-1 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 flex items-center justify-center gap-2"
+                  onClick={() => setIsClearModalOpen(true)}
+                >
+                  <FaTrash /> Limpiar Todo
+                </button>
               </div>
             </div>
           </div>
         </div>
+        <ProductInputModal
+          isOpen={modalProductoTemporal}
+          onClose={() => {
+            setModalProductoTemporal(false);
+            setProductTemporal(null);
+          }}
+          onSubmit={(producto) => {
+            // Count how many products are temporal
+            const tempCount = products.filter((p) => p.isTemporal).length;
+
+            // Find the next available TEMP catalog number
+            let nextTempCatalogNumber = tempCount + 1;
+
+            while (
+              products.some(
+                (p) => p.catalogo === `TEMP-${nextTempCatalogNumber}`
+              )
+            ) {
+              nextTempCatalogNumber++;
+            }
+
+            // Assign the next available TEMP catalog number to the new product
+            producto.catalogo = `TEMP-${nextTempCatalogNumber}`;
+            setProducts([
+              ...products,
+              {
+                catalogo: producto.catalogo,
+                modelo: producto.modelo,
+                producto: producto.nombre,
+                cantidad: producto.cantidad,
+                price: Number(producto.precio),
+                isTemporal: true,
+              },
+            ]);
+            setModalProductoTemporal(false);
+          }}
+          productoTemporal={productTemporal}
+        />
       </div>
+      {/* Modal de Confirmación */}
+      {isClearModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96 text-center">
+            <h2 className="text-xl font-bold text-gray-800">¿Estás seguro?</h2>
+            <p className="text-gray-600 mt-2">
+              Esto eliminará todos los datos ingresados.
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                onClick={handleResetForm}
+              >
+                Sí, limpiar
+              </button>
+              <button
+                className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+                onClick={() => setIsClearModalOpen(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

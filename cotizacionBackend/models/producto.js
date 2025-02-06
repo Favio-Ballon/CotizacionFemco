@@ -3,7 +3,8 @@ module.exports = (sequelize, Sequelize) => {
         catalogo: {
             type: Sequelize.INTEGER,
             nullable: false,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true
         },
         nombre: {
             type: Sequelize.STRING,
@@ -16,5 +17,16 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.BOOLEAN
         }
     })
+
+    // Hook to set the starting value for catalogo
+    Producto.beforeSync(async () => {
+        const maxCatalogo = await Producto.max('catalogo')
+        if (maxCatalogo) {
+            await sequelize.query(
+                `ALTER TABLE productos AUTO_INCREMENT = ${maxCatalogo + 1}`
+            )
+        }
+    })
+
     return Producto
 }

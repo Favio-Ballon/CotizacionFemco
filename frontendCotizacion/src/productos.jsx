@@ -264,7 +264,6 @@ const ProductCatalog = () => {
 
   return (
     <>
-      <Sidebar />
       {!loading && (
         <div className="md:ml-20">
           <div className="p-6 max-w-7xl mx-auto">

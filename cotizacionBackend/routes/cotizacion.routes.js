@@ -11,5 +11,8 @@ module.exports = (app) => {
     router.put('/:id', controller.updateCotizacion)
     router.delete('/:id', controller.deleteCotizacion)
 
+    //imagen
+    router.post('/upload/:id', controller.addOrUpdateImage)
+
     app.use('/cotizacion', router)
 }

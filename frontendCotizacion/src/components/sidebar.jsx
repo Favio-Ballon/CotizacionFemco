@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [activeLink, setActiveLink] = useState("cotizar");
+  const [activeLink, setActiveLink] = useState("");
   const [showText, setShowText] = useState(false);
   const navigate = useNavigate();
 
@@ -29,8 +29,8 @@ const Sidebar = () => {
 
     //check the link to set the active link
     const path = window.location.pathname;
-    if (path.includes("cotizar") || path.includes("cotizacion")) {
-      setActiveLink("cotizar");
+    if (path.includes("cotizar") || path.includes("cotizacion/")) {
+      setActiveLink("cotizacion/new");
     } else if (path.includes("productos")) {
       setActiveLink("productos");
     } else if (path.includes("cotizaciones")) {
@@ -55,7 +55,7 @@ const Sidebar = () => {
 
   const navigationItems = useMemo(
     () => [
-      { id: "cotizar", label: "Cotizar", icon: FiBookOpen },
+      { id: "cotizacion/new", label: "Cotizar", icon: FiBookOpen },
       { id: "productos", label: "Productos", icon: FiPackage },
       { id: "cotizaciones", label: "Cotizaciones", icon: FiArchive },
       { id: "dashboard", label: "Dashboard", icon: FiInfo },

@@ -13,6 +13,7 @@ module.exports = (app) => {
 
     router.post('/create', controller.createProductoWeb)
     router.put('/update/:id', controller.updateProductoWeb)
+    router.post('/temporal', controller.createProductoTemporal)
 
     app.use('/producto', router)
 }

@@ -47,7 +47,6 @@ exports.listCotizacionById = (req, res) => {
 }
 
 exports.createCotizacion = async (req, res) => {
-    console.log(req.body)
     const requiredFields = [
         'nombre',
         'referencia',
@@ -55,10 +54,18 @@ exports.createCotizacion = async (req, res) => {
         'subtotal',
         'formaPago',
         'tiempoEntrega',
-        'productos',
+        'productos'
     ]
 
     if (!isRequestValid(requiredFields, req.body, res)) {
+        return
+    }
+
+    //check for imagen foto
+    if (req.body.productos.length === 0) {
+        res.status(400).send({
+            message: 'La cotización debe contener al menos un producto.'
+        })
         return
     }
 
@@ -76,7 +83,7 @@ exports.createCotizacion = async (req, res) => {
         referencia: req.body.referencia,
         observaciones: req.body.observaciones ?? '',
         agregado: req.body.agregado ?? 0,
-        subtotal: req.body.subtotal,
+        subtotal: req.body.subtotal
     }
 
     try {
@@ -104,7 +111,7 @@ exports.updateCotizacion = async (req, res) => {
         'subtotal',
         'formaPago',
         'tiempoEntrega',
-        'productos',
+        'productos'
     ]
 
     if (!isRequestValid(requiredFields, req.body, res)) {
@@ -131,7 +138,6 @@ exports.updateCotizacion = async (req, res) => {
         cotizacion.observaciones = req.body.observaciones ?? ''
         cotizacion.agregado = req.body.agregado ?? 0
         cotizacion.subtotal = req.body.subtotal
-
 
         await cotizacion.save()
 
@@ -187,5 +193,48 @@ async function updateProductos(cotizacionId, productoIds) {
         cotizacion.addProducto(producto, {
             through: { cantidad: productoId[1] }
         })
+    })
+}
+
+exports.addOrUpdateImage = async (req, res) => {
+    console.log(req.files)
+    const id = req.params.id
+    const cotizacion = await db.cotizacion.findByPk(id)
+
+    if (!cotizacion) {
+        res.status(404).send({
+            message: `No se encontró la cotización con id ${id}.`
+        })
+        return
+    }
+
+    if (!req.files) {
+        res.status(400).send({
+            message: 'No se encontró la imagen.'
+        })
+        return
+    }
+
+    uploadImage(req, res, cotizacion)
+
+}
+
+const path = require('path')
+
+function uploadImage(req, res, cotizacion) {
+    const file = req.files.imagen
+    const uploadPath = path.resolve(__dirname, '../uploads/cotizacion', `${cotizacion.id}.${file.name.split('.').pop()}`)
+
+    file.mv(uploadPath, (err) => {
+        if (err) {
+            res.status(500).send({
+                message: 'Error al subir la imagen.'
+            })
+            return
+        }
+
+        cotizacion.imagen = `${cotizacion.id}.${file.name.split('.').pop()}`
+        cotizacion.save()
+        res.status(200).send()
     })
 }

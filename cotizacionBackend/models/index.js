@@ -92,4 +92,15 @@ db.grupo.belongsTo(db.usuario, {
     foreignKey: 'usuarioId'
 })
 
+const init = async () => {
+    try {
+        await sequelize.sync();
+        console.log('Database synchronized');
+    } catch (error) {
+        console.error('Error synchronizing database:', error);
+    }
+};
+
+init();
+
 module.exports = db

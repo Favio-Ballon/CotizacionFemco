@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { FaPrint } from "react-icons/fa";
+import { FaPrint, FaWhatsapp } from "react-icons/fa";
 import { format } from "date-fns";
 import html2pdf from "html2pdf.js";
 import { useParams } from "react-router-dom";
+import ModalTelefono from "./components/modalTelefono";
 
 const QuotationDocument = () => {
   const [currentDate] = useState(new Date());
@@ -35,6 +36,8 @@ const QuotationDocument = () => {
   ]);
 
   const [extras, setExtras] = useState({});
+
+  const [isModalOpen, setIsModalOpen] = useState(false); 
 
   useEffect(() => {
     getDatosCotizacion();
@@ -284,9 +287,7 @@ const QuotationDocument = () => {
         {/* image */}
         <div className=" w-1/2 mr-4">
           <img
-            src={
-              "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Firma_de_Harold.jpg/621px-Firma_de_Harold.jpg"
-            }
+            src="../../firmaDefinitva.png"
             alt="firma"
             className="h-40 w-50 m-auto"
           />
@@ -303,13 +304,25 @@ const QuotationDocument = () => {
       style={{ height: "40.33vh" }} // Altura definida como 1/3 de la página
     >
       <img
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7Z0lxKEU6huhHGqYsk_JZp0RstgGz2DZOww&s"
+        src={`http://localhost:3000/uploads/cotizacion/${imagen}`}
         alt="Locker"
         className="h-full object-contain" // Imagen ajustada al tamaño del contenedor
       />
     </div>
   );
 
+  const handleWhatsAppShare = async () => {
+    handlePrint(); // Generate the PDF
+    setIsModalOpen(true); // Open the modal to ask for the phone number
+  };
+
+  const handlePhoneNumberSubmit = (phoneNumber) => {
+    if (phoneNumber) {
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=591${phoneNumber}&text=Buenas,%20aqui%20esta%20su%20cotizacion.`;
+      window.open(whatsappUrl, "_blank");
+    }
+    setIsModalOpen(false); // Close the modal
+  };
   return (
     <div className="max-w-5xl mx-auto my-8 bg-white rounded-lg shadow-lg print:shadow-none">
       <style>
@@ -317,15 +330,15 @@ const QuotationDocument = () => {
           @media print {
             @page {
               size: A4;
-              margin: 0; /* Remove page margin */
+              margin: 0;
             }
             body {
-              margin: 0; /* Remove body margin */
+              margin: 0;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
             .force-new-page {
-              page-break-before: always; /* Force a new page before this element */
+              page-break-before: always;
             }
           }
         `}
@@ -333,10 +346,17 @@ const QuotationDocument = () => {
       <div className="print:hidden mb-4 flex justify-end">
         <button
           onClick={handlePrint}
-          className="bg-[#1b1464] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-opacity-90 transition-colors"
+          className="bg-[#1b1464] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-opacity-90 transition-colors mr-2"
         >
           <FaPrint />
-          Download PDF
+          Descargar PDF
+        </button>
+        <button
+          onClick={handleWhatsAppShare}
+          className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-opacity-90 transition-colors"
+        >
+          <FaWhatsapp />
+          Compartir por WhatsApp
         </button>
       </div>
       <div ref={quotationRef}>
@@ -348,8 +368,14 @@ const QuotationDocument = () => {
         <ConditionsComponent />
         {imagen && <FooterComponent />}
       </div>
+
+      {/* Modal for phone number input */}
+      <ModalTelefono
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handlePhoneNumberSubmit}
+      />
     </div>
   );
 };
-
 export default QuotationDocument;

@@ -37,6 +37,10 @@ db.sequelize
 
 require('./routes')(app)
 
+//make static files available
+app.use('/uploads/cotizacion', express.static('uploads/cotizacion'));
+
+
 app.listen(3000, function () {
     console.log('Ingrese a http://localhost:3000')
 })

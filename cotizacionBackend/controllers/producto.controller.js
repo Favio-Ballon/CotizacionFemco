@@ -246,7 +246,82 @@ exports.updateProductoWeb = async (req, res) => {
             res.status(500).send({
                 message:
                     err.message ||
-                    `Ocurrió un error al actualizar el producto con id ${id}.`
+                    `Ocurrió un error al actualizar el producto con id ${catalogo}.`
+            })
+        })
+}
+
+const { sequelize } = require('../models')
+
+exports.createProductoTemporal = async (req, res) => {
+    const requiredFields = ['nombre', 'precio', 'modelo']
+
+    if (!isRequestValid(requiredFields, req.body, res)) {
+        return
+    }
+
+    // Buscar modelo it doesnt matter if it is a new model or an existing one, and isnt case sensitive
+    const modeloId = await db.modelo.findOne({
+        where: {
+            nombre: req.body.modelo
+        }
+    })
+    await sequelize
+        .transaction(async (t) => {
+            if (!modeloId) {
+                //create new model
+                const modelo = {
+                    nombre: req.body.modelo,
+                    unidad: 'pzs'
+                }
+
+                const newModelo = await db.modelo.create(modelo, {
+                    transaction: t
+                })
+                req.body.modeloId = newModelo.id
+            } else {
+                req.body.modeloId = modeloId.id
+            }
+
+            // Se configrma que el catalogo sea autoincremental 
+            const maxCatalogo = await db.producto.max('catalogo', {
+                transaction: t
+            })
+            console.log('Max catalogo:', maxCatalogo) 
+            if (maxCatalogo) {
+                await sequelize.query(
+                    `ALTER TABLE productos AUTO_INCREMENT = ${maxCatalogo + 1}`,
+                    { transaction: t }
+                )
+            }
+
+            const producto = {
+                nombre: req.body.nombre,
+                precio: req.body.precio,
+                modeloId: req.body.modeloId,
+                usuarioId: req.body.usuarioId ?? null,
+                esTemporal: true
+            }
+
+            await db.producto.create(producto, { transaction: t }).then((data) => {
+                const producto = {
+                    catalogo: data.catalogo,
+                    nombre: data.nombre,
+                    precio: data.precio,
+                    modelo: {
+                        nombre: req.body.modelo
+                    }
+                }
+                res.status(201).send(producto)
+            })
+        })
+        .then(() => {
+            console.log('Producto creado exitosamente')
+        })
+        .catch((err) => {
+            console.log(err)
+            res.status(500).send({
+                message: err.message || 'Ocurrió un error al crear el producto.'
             })
         })
 }
