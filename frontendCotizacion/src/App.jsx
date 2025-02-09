@@ -500,7 +500,7 @@ const QuotationForm = () => {
             {/* Left Column - Form */}
             <div className="lg:col-span-2 space-y-6 ">
               <h2 className="text-2xl font-bold text-gray-800">
-                Informacion del cliente
+                Informacion del cliente prueba del cambio
               </h2>
               <div className="space-y-4">
                 <div>
