@@ -51,7 +51,7 @@ const ProductCatalog = () => {
   async function fetchProductoAndStoreInSession() {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/producto");
+      const response = await fetch("https://api.cotizafemco.com/producto");
       const data = await response.json();
       sessionStorage.setItem("productoData", JSON.stringify(data));
       setProducts(data);
@@ -139,7 +139,7 @@ const ProductCatalog = () => {
     );
 
     //endpoint localhost:3000/producto/:catalogo
-    fetch(`http://localhost:3000/producto/${selectedProduct.catalogo}`, {
+    fetch(`https://api.cotizafemco.com/producto/${selectedProduct.catalogo}`, {
       method: "DELETE",
     });
 
@@ -164,7 +164,7 @@ const ProductCatalog = () => {
       };
       try {
         const response = await fetch(
-          `http://localhost:3000/producto/update/${selectedProduct.catalogo}`,
+          `https://api.cotizafemco.com/producto/update/${selectedProduct.catalogo}`,
           {
             method: "PUT",
             headers: {
@@ -210,7 +210,7 @@ const ProductCatalog = () => {
       };
 
       try {
-        const response = await fetch("http://localhost:3000/producto/create", {
+        const response = await fetch("https://api.cotizafemco.com/producto/create", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

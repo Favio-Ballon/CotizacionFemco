@@ -69,7 +69,7 @@ const QuotationForm = () => {
 
   async function fetchQuotationData(id) {
     try {
-      const response = await fetch(`http://localhost:3000/cotizacion/${id}`);
+      const response = await fetch(`https://api.cotizafemco.com/cotizacion/${id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -132,7 +132,7 @@ const QuotationForm = () => {
     //clean the session storage
     sessionStorage.removeItem("productoData");
     try {
-      const response = await fetch("http://localhost:3000/producto");
+      const response = await fetch("https://api.cotizafemco.com/producto");
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -152,7 +152,7 @@ const QuotationForm = () => {
     //clean the session storage
     sessionStorage.removeItem("modeloData");
     try {
-      const response = await fetch("http://localhost:3000/modelo");
+      const response = await fetch("https://api.cotizafemco.com/modelo");
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -354,7 +354,7 @@ const QuotationForm = () => {
     if (!validateGuardarCotizacion()) {
       return;
     }
-    //endpoint para guardar la cotizacion http://localhost:3000/cotizacion
+    //endpoint para guardar la cotizacion https://api.cotizafemco.com/cotizacion
     const cotizacion = {
       nombre: customerInfo.name,
       formaPago: optionalDetails.formaPago,
@@ -376,7 +376,7 @@ const QuotationForm = () => {
         //Se crea los productos temporales
         if (Array.isArray(products)) {
           if (producto.isTemporal) {
-            await fetch("http://localhost:3000/producto/temporal", {
+            await fetch("https://api.cotizafemco.com/producto/temporal", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -423,10 +423,10 @@ const QuotationForm = () => {
     var method;
 
     if (id !== "new" && !isNaN(Number(id))) {
-      link = `http://localhost:3000/cotizacion/${id}`;
+      link = `https://api.cotizafemco.com/cotizacion/${id}`;
       method = "PUT";
     } else {
-      link = "http://localhost:3000/cotizacion";
+      link = "https://api.cotizafemco.com/cotizacion";
       method = "POST";
     }
 
@@ -448,7 +448,7 @@ const QuotationForm = () => {
         const formData = new FormData();
         formData.append("imagen", optionalDetails.imagen);
         const response = await fetch(
-          `http://localhost:3000/cotizacion/upload/${data.id}`,
+          `https://api.cotizafemco.com/cotizacion/upload/${data.id}`,
           {
             method: "POST",
             body: formData,

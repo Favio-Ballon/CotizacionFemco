@@ -19,7 +19,7 @@ const QuotationList = () => {
   }, []);
 
   const fetchCotizaciones = async () => {
-    const response = await fetch("http://localhost:3000/cotizacion");
+    const response = await fetch("https://api.cotizafemco.com/cotizacion");
     const data = await response.json();
     setCotizaciones(data);
   };

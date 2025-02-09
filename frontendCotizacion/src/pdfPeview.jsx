@@ -45,7 +45,7 @@ const QuotationDocument = () => {
 
   const getDatosCotizacion = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/cotizacion/${id}`);
+      const response = await fetch(`https://api.cotizafemco.com/cotizacion/${id}`);
       const data = await response.json();
       setClientInfo({
         name: data.nombre,
@@ -304,7 +304,7 @@ const QuotationDocument = () => {
       style={{ height: "40.33vh" }} // Altura definida como 1/3 de la página
     >
       <img
-        src={`http://localhost:3000/uploads/cotizacion/${imagen}`}
+        src={`https://api.cotizafemco.com/uploads/cotizacion/${imagen}`}
         alt="Locker"
         className="h-full object-contain" // Imagen ajustada al tamaño del contenedor
       />

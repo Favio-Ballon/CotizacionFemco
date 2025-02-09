@@ -1,2 +1,7 @@
 cotizacionBackend/uploads/1738253054184-alma (1).xls
 frontendCotizacion/firmaDefinitva.png
+deploy.bat
+pm2-startup.bat
+ecosystem.config.js
+start-backend.js
+start-frontend.js

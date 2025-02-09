@@ -13,8 +13,8 @@ app.use(
 )
 
 var corsOptions = {
-    origin: 'http://localhost:5173'
-}
+    origin: ['https://www.cotizafemco.com', 'https://github.com'], // Allow frontend & GitHub
+};
 
 app.use(cors(corsOptions))
 
@@ -40,7 +40,25 @@ require('./routes')(app)
 //make static files available
 app.use('/uploads/cotizacion', express.static('uploads/cotizacion'));
 
+app.post("/webhook", (req, res) => {
+    console.log("Webhook received from GitHub");
 
-app.listen(3000, function () {
+    exec("C:\\Users\\59179\\Documents\\web\\CotizacionFemco\\deploy.bat", (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error: ${error.message}`);
+            return res.status(500).send("Deployment failed");
+        }
+        if (stderr) {
+            console.error(`stderr: ${stderr}`);
+            return res.status(500).send("Deployment error");
+        }
+
+        console.log(`stdout: ${stdout}`);
+        res.status(200).send("Deployment successful");
+    });
+});
+
+
+app.listen(3000,"0.0.0.0", function () {
     console.log('Ingrese a http://localhost:3000')
 })
