@@ -1,5 +1,5 @@
-// http://localhost:3000  || https://www.cotizafemco.com
-export const BACKEND_URL = "https://www.cotizafemco.com";
+// http://localhost:3000  || https://api.cotizafemco.com
+export const BACKEND_URL = "https://api.cotizafemco.com";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
