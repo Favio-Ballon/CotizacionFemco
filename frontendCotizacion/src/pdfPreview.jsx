@@ -3,7 +3,8 @@ import { FaPrint, FaWhatsapp } from "react-icons/fa";
 import { format } from "date-fns";
 import html2pdf from "html2pdf.js";
 import { useParams } from "react-router-dom";
-import ModalTelefono from "./components/modalTelefono";
+import ModalTelefono from "./components/modalTelefono.jsx";
+import { BACKEND_URL } from "./main.jsx";
 
 const QuotationDocument = () => {
   const [currentDate] = useState(new Date());
@@ -37,7 +38,7 @@ const QuotationDocument = () => {
 
   const [extras, setExtras] = useState({});
 
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     getDatosCotizacion();
@@ -45,7 +46,7 @@ const QuotationDocument = () => {
 
   const getDatosCotizacion = async () => {
     try {
-      const response = await fetch(`https://api.cotizafemco.com/cotizacion/${id}`);
+      const response = await fetch(`${BACKEND_URL}/cotizacion/${id}`);
       const data = await response.json();
       setClientInfo({
         name: data.nombre,
@@ -304,7 +305,7 @@ const QuotationDocument = () => {
       style={{ height: "40.33vh" }} // Altura definida como 1/3 de la página
     >
       <img
-        src={`https://api.cotizafemco.com/uploads/cotizacion/${imagen}`}
+        src={`${BACKEND_URL}/uploads/cotizacion/${imagen}`}
         alt="Locker"
         className="h-full object-contain" // Imagen ajustada al tamaño del contenedor
       />

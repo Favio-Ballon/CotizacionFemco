@@ -1,3 +1,6 @@
+// http://localhost:3000  || https://www.cotizafemco.com
+export const BACKEND_URL = "https://www.cotizafemco.com";
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -6,11 +9,11 @@ import {
   Navigate,
 } from "react-router-dom";
 import "./index.css";
-import QuotationForm from "./App.jsx";
+import QuotationForm from "./formCotizar.jsx";
 import "./index.css";
-import QuotationDocument from "./pdfPeview.jsx";
-import ProductManagement from "./productos.jsx";
-import QuotationList from "./cotizaciones.jsx";
+import QuotationDocument from "./pdfPreview.jsx";
+import ProductManagement from "./listProductos.jsx";
+import QuotationList from "./listCotizaciones.jsx";
 import Sidebar from "./components/sidebar.jsx";
 
 const MainLayout = ({ children }) => (

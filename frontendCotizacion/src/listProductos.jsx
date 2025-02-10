@@ -7,7 +7,7 @@ import {
   FiArrowUp,
   FiArrowDown,
 } from "react-icons/fi";
-import Sidebar from "./components/sidebar";
+import { BACKEND_URL } from "./main.jsx";
 
 const ProductCatalog = () => {
   const [products, setProducts] = useState([]);
@@ -51,7 +51,7 @@ const ProductCatalog = () => {
   async function fetchProductoAndStoreInSession() {
     setLoading(true);
     try {
-      const response = await fetch("https://api.cotizafemco.com/producto");
+      const response = await fetch(`${BACKEND_URL}/producto`);
       const data = await response.json();
       sessionStorage.setItem("productoData", JSON.stringify(data));
       setProducts(data);
@@ -139,7 +139,7 @@ const ProductCatalog = () => {
     );
 
     //endpoint localhost:3000/producto/:catalogo
-    fetch(`https://api.cotizafemco.com/producto/${selectedProduct.catalogo}`, {
+    fetch(`${BACKEND_URL}/producto/${selectedProduct.catalogo}`, {
       method: "DELETE",
     });
 
@@ -164,7 +164,7 @@ const ProductCatalog = () => {
       };
       try {
         const response = await fetch(
-          `https://api.cotizafemco.com/producto/update/${selectedProduct.catalogo}`,
+          `${BACKEND_URL}/producto/update/${selectedProduct.catalogo}`,
           {
             method: "PUT",
             headers: {
@@ -210,7 +210,7 @@ const ProductCatalog = () => {
       };
 
       try {
-        const response = await fetch("https://api.cotizafemco.com/producto/create", {
+        const response = await fetch(`${BACKEND_URL}/producto/create`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

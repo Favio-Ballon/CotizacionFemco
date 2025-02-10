@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { FiEdit, FiPrinter, FiDownload, FiSearch } from "react-icons/fi";
+import { FiEdit, FiPrinter, FiSearch } from "react-icons/fi";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Sidebar from "./components/sidebar";
 import { useNavigate } from "react-router-dom";
+import { BACKEND_URL } from "./main.jsx";
 
 const QuotationList = () => {
   const navigate = useNavigate();
@@ -19,49 +19,10 @@ const QuotationList = () => {
   }, []);
 
   const fetchCotizaciones = async () => {
-    const response = await fetch("https://api.cotizafemco.com/cotizacion");
+    const response = await fetch(`${BACKEND_URL}/cotizacion`);
     const data = await response.json();
     setCotizaciones(data);
   };
-
-  const mockData = [
-    {
-      id: 1,
-      clientName: "John Smith",
-      referenceNumber: "QT-2024-001",
-      date: "2024-01-15",
-    },
-    {
-      id: 2,
-      clientName: "Emma Johnson",
-      referenceNumber: "QT-2024-002",
-      date: "2024-01-16",
-    },
-    {
-      id: 3,
-      clientName: "Michael Brown",
-      referenceNumber: "QT-2024-003",
-      date: "2024-01-17",
-    },
-    {
-      id: 4,
-      clientName: "Sarah Davis",
-      referenceNumber: "QT-2024-004",
-      date: "2024-01-18",
-    },
-    {
-      id: 5,
-      clientName: "James Wilson",
-      referenceNumber: "QT-2024-005",
-      date: "2024-01-19",
-    },
-    {
-      id: 6,
-      clientName: "Lisa Anderson",
-      referenceNumber: "QT-2024-006",
-      date: "2024-01-20",
-    },
-  ];
 
   const filteredData = cotizaciones.filter((quote) => {
     const matchesSearch =

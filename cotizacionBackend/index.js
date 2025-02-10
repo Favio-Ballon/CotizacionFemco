@@ -14,7 +14,11 @@ app.use(
 )
 
 var corsOptions = {
-    origin: ['https://www.cotizafemco.com', 'https://github.com'] // Allow frontend & GitHub
+    origin: [
+        'https://www.cotizafemco.com',
+        'https://github.com',
+        'http://localhost:5173'
+    ] // Allow frontend & GitHub
 }
 
 app.use(cors(corsOptions))
