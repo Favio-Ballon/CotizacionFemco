@@ -184,9 +184,21 @@ async function setProductos(cotizacionId, productoIds) {
 }
 
 async function updateProductos(cotizacionId, productoIds) {
-    const cotizacion = await db.cotizacion.findByPk(cotizacionId)
+    const cotizacion = await db.cotizacion.findByPk(cotizacionId, {
+        include: ['productos']
+    })
 
-    await cotizacion.removeProductos()
+    console.log('Attempting to remove productos')
+    await cotizacion
+        .removeProductos(cotizacion.productos)
+        .then(() => {
+            console.log('Productos removed successfully')
+        })
+        .catch((error) => {
+            console.error('Error removing productos:', error)
+        })
+
+    console.log(productoIds, 'productoIds')
 
     productoIds.forEach(async (productoId) => {
         const producto = await db.producto.findByPk(productoId[0])
@@ -216,14 +228,17 @@ exports.addOrUpdateImage = async (req, res) => {
     }
 
     uploadImage(req, res, cotizacion)
-
 }
 
 const path = require('path')
 
 function uploadImage(req, res, cotizacion) {
     const file = req.files.imagen
-    const uploadPath = path.resolve(__dirname, '../uploads/cotizacion', `${cotizacion.id}.${file.name.split('.').pop()}`)
+    const uploadPath = path.resolve(
+        __dirname,
+        '../uploads/cotizacion',
+        `${cotizacion.id}.${file.name.split('.').pop()}`
+    )
 
     file.mv(uploadPath, (err) => {
         if (err) {
