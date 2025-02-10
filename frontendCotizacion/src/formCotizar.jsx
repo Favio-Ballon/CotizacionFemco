@@ -231,7 +231,12 @@ const QuotationForm = () => {
   };
 
   const handleRemoveProduct = (catalogo) => {
-    setProducts(products.filter((producto) => producto.catalogo !== catalogo));
+    console.log(catalogo);
+    const tempProduct = products.filter(
+      (producto) => Number(producto.catalogo) !== Number(catalogo)
+    );
+    setProducts(tempProduct);
+    console.log(tempProduct);
   };
 
   const handleEditProduct = (catalogo) => {
@@ -421,6 +426,9 @@ const QuotationForm = () => {
   const handleCotizacion = async (cotizacion) => {
     var link;
     var method;
+
+    console.log("cotizacion");
+    console.log(cotizacion.productos);
 
     if (id !== "new" && !isNaN(Number(id))) {
       link = `${BACKEND_URL}/cotizacion/${id}`;

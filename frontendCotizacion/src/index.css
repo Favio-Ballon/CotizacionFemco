@@ -15,4 +15,9 @@
     display: none; /* Ocultar elementos específicos como el botón "Print" */
   }
 
+  
 }
+
+  .select-text {
+    user-select: text;
+  }

@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { FaPrint, FaWhatsapp } from "react-icons/fa";
 import { format } from "date-fns";
-import html2pdf from "html2pdf.js";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { useParams } from "react-router-dom";
 import ModalTelefono from "./components/modalTelefono.jsx";
 import { BACKEND_URL } from "./main.jsx";
@@ -13,9 +14,9 @@ const QuotationDocument = () => {
 
   const [companyDetails, setCompanyDetails] = useState({
     name: "FEMCO",
-    address: "123 Business Avenue, La Paz, Bolivia",
-    email: "",
-    phone: "",
+    address: "Agencia SP 4to anillo #4210",
+    email: "femco.sp.scz@gmail.com",
+    phone: "79373415",
   });
 
   const [clientInfo, setClientInfo] = useState({
@@ -51,7 +52,7 @@ const QuotationDocument = () => {
       setClientInfo({
         name: data.nombre,
         location: "Santa Cruz",
-        quotedBy: "Eliana",
+        quotedBy: "Eliana Alvarez",
       });
 
       // product may be a single item or an array of items
@@ -74,9 +75,9 @@ const QuotationDocument = () => {
 
       setCompanyDetails({
         name: "FEMCO",
-        address: "123 Business Avenue, La Paz, Bolivia",
-        email: "",
-        phone: "",
+        address: "Agencia SP 4to anillo entre Av.Banzer y Beni #4210",
+        email: "femco.sp.scz@gmail.com",
+        phone: "79373415",
       });
 
       var formaPago = "";
@@ -116,24 +117,33 @@ const QuotationDocument = () => {
 
       setImagen(data.imagen ? data.imagen : "");
 
-      document.title = `Quotation - ${clientInfo.name}`;
+      document.title = `Cotizacion - ${clientInfo.name}`;
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const element = quotationRef.current; // Get the HTML content
-    const opt = {
-      margin: 0, // Set margin to 0 to remove white space
-      filename: `quotation_${format(currentDate, "yyyyMMdd")}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-    };
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: false,
+  });
 
-    // Generate and download the PDF
-    html2pdf().from(element).set(opt).save();
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF({
+    unit: "mm",
+    format: "a4",
+    orientation: "portrait",
+  });
+
+  const imgProps = pdf.getImageProperties(imgData);
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+  pdf.save(`Cotizacion_${clientInfo.name}_${format(currentDate, "yyyyMMdd")}.pdf`);
   };
 
   const HeaderComponent = () => (
