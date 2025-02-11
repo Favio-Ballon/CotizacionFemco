@@ -300,7 +300,7 @@ const QuotationDocument = () => {
           <img
             src="../../firmaDefinitva.png"
             alt="firma"
-            className="h-40 w-50 m-auto"
+            className="h-30 w-40 m-auto"
           />
           <p className=" border-t text-center text-gray-700 ml-4 mt-0">
             {clientInfo.quotedBy}

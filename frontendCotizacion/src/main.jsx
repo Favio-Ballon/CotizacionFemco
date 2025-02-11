@@ -15,6 +15,7 @@ import QuotationDocument from "./pdfPreview.jsx";
 import ProductManagement from "./listProductos.jsx";
 import QuotationList from "./listCotizaciones.jsx";
 import Sidebar from "./components/sidebar.jsx";
+import LoginPage from "./login.jsx";
 
 const MainLayout = ({ children }) => (
   <div>
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
         <QuotationList />
       </MainLayout>
     ),
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
   },
   {
     path: "*",
