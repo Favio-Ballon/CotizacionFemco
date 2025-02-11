@@ -47,7 +47,8 @@ exports.createUsuario = async (req, res) => {
         'correo',
         'usuario',
         'contrasena',
-        'telefono'
+        'telefono',
+        'direccion'
     ]
 
     if (!isRequestValid(requiredFields, req.body, res)) {
@@ -60,7 +61,9 @@ exports.createUsuario = async (req, res) => {
         contrasena: bcrypt.hashSync(req.body.contrasena, 10),
         usuario: req.body.usuario,
         apellido: req.body.apellido,
-        telefono: req.body.telefono
+        telefono: req.body.telefono,
+        direccion: req.body.direccion,
+        firma: req.body.firma ?? null
     }
 
     db.usuario

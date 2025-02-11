@@ -20,11 +20,18 @@ module.exports = (sequelize, Sequelize) => {
 
     // Hook to set the starting value for catalogo
     Producto.beforeSync(async () => {
-        const maxCatalogo = await Producto.max('catalogo')
-        if (maxCatalogo) {
-            await sequelize.query(
-                `ALTER TABLE productos AUTO_INCREMENT = ${maxCatalogo + 1}`
-            )
+        const tableExists = await sequelize
+            .getQueryInterface()
+            .showAllTables()
+            .then((tables) => tables.includes('productos'))
+
+        if (tableExists) {
+            const maxCatalogo = await Producto.max('catalogo')
+            if (maxCatalogo) {
+                await sequelize.query(
+                    `ALTER TABLE productos AUTO_INCREMENT = ${maxCatalogo + 1}`
+                )
+            }
         }
     })
 

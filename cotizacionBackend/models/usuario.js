@@ -26,6 +26,9 @@ module.exports = (sequelize, Sequelize) => {
         telefono: {
             type: Sequelize.STRING
         },
+        direccion: {
+            type: Sequelize.STRING
+        }
     })
     return Usuario
 }
