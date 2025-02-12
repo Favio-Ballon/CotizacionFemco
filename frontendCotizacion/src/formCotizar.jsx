@@ -70,7 +70,7 @@ const QuotationForm = () => {
 
   async function fetchQuotationData(id) {
     try {
-      const response = await fetch(`${BACKEND_URL}/cotizacion/${id}`,{
+      const response = await fetch(`${BACKEND_URL}/cotizacion/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -110,7 +110,7 @@ const QuotationForm = () => {
   async function checkModeloInSession() {
     // Check if data is already stored in sessionStorage
     const storedData = sessionStorage.getItem("modeloData");
-    if (storedData) {
+    if (storedData && storedData.length > 0) {
       console.log("Data already stored in sessionStorage");
       setDatosModelo(JSON.parse(storedData));
       return;
@@ -123,7 +123,7 @@ const QuotationForm = () => {
   async function checkProductoInSession() {
     // Check if data is already stored in sessionStorage
     const storedData = sessionStorage.getItem("productoData");
-    if (storedData) {
+    if (storedData && storedData.length > 0) {
       console.log("Data already stored in sessionStorage");
       setDatosProducto(JSON.parse(storedData));
       return;
@@ -137,7 +137,7 @@ const QuotationForm = () => {
     //clean the session storage
     sessionStorage.removeItem("productoData");
     try {
-      const response = await fetch(`${BACKEND_URL}/producto`,{
+      const response = await fetch(`${BACKEND_URL}/producto`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -161,7 +161,7 @@ const QuotationForm = () => {
     //clean the session storage
     sessionStorage.removeItem("modeloData");
     try {
-      const response = await fetch(`${BACKEND_URL}/modelo`,{
+      const response = await fetch(`${BACKEND_URL}/modelo`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -286,6 +286,12 @@ const QuotationForm = () => {
       setErrors({ catalogo: "Catalogo no encontrado" });
       return;
     } else if (producto) {
+      const productoSeleccionado = {
+        catalogo: producto.catalogo,
+        nombre: producto.nombre,
+      };
+      setSeleccionarProducto([productoSeleccionado]);
+      
       setProductEntry({
         ...productEntry,
         catalogo: producto.catalogo,
@@ -295,11 +301,7 @@ const QuotationForm = () => {
       });
       setErrors({});
 
-      const productoSeleccionado = {
-        catalogo: producto.catalogo,
-        name: producto.nombre,
-      };
-      setSeleccionarProducto([productoSeleccionado]);
+      console.log(productoSeleccionado);
     }
   };
 
@@ -589,7 +591,7 @@ const QuotationForm = () => {
                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
                       errors.catalogo ? "border-red-500" : ""
                     }`}
-                    value={productEntry.catalogo || ""}
+                    value={Number(productEntry.catalogo) || ""}
                     onChange={(e) => handleCatalago(e)}
                   />
                   {errors.catalogo && (
