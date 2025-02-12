@@ -37,6 +37,7 @@ const QuotationForm = () => {
   const [productTemporal, setProductTemporal] = useState(null);
   const [modalProductoTemporal, setModalProductoTemporal] = useState(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     checkModeloInSession();
@@ -69,7 +70,11 @@ const QuotationForm = () => {
 
   async function fetchQuotationData(id) {
     try {
-      const response = await fetch(`${BACKEND_URL}/cotizacion/${id}`);
+      const response = await fetch(`${BACKEND_URL}/cotizacion/${id}`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -132,7 +137,11 @@ const QuotationForm = () => {
     //clean the session storage
     sessionStorage.removeItem("productoData");
     try {
-      const response = await fetch(`${BACKEND_URL}/producto`);
+      const response = await fetch(`${BACKEND_URL}/producto`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -152,7 +161,11 @@ const QuotationForm = () => {
     //clean the session storage
     sessionStorage.removeItem("modeloData");
     try {
-      const response = await fetch(`${BACKEND_URL}/modelo`);
+      const response = await fetch(`${BACKEND_URL}/modelo`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -296,6 +309,7 @@ const QuotationForm = () => {
       ...productEntry,
       modelo: e.target.value,
     });
+    console.log(datosModelo);
     const modelo = datosModelo.find(
       (m) => m.nombre.toLowerCase() === inputValue
     );
@@ -385,6 +399,7 @@ const QuotationForm = () => {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
               },
               body: JSON.stringify({
                 nombre: producto.producto || "",
@@ -443,6 +458,7 @@ const QuotationForm = () => {
       method: method,
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(cotizacion),
     });
@@ -458,6 +474,7 @@ const QuotationForm = () => {
         const response = await fetch(
           `${BACKEND_URL}/cotizacion/upload/${data.id}`,
           {
+            headers: { Authorization: `Bearer ${token}` },
             method: "POST",
             body: formData,
           }

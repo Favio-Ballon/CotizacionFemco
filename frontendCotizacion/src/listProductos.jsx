@@ -6,14 +6,20 @@ import {
   FiSearch,
   FiArrowUp,
   FiArrowDown,
+  FiBook,
 } from "react-icons/fi";
 import { BACKEND_URL } from "./main.jsx";
+import ExcelInputModal from "./components/overlayExce.jsx";
+import OverlayLoading from "./components/OverlayLoading.jsx";
+import { set } from "date-fns";
 
 const ProductCatalog = () => {
+  const token = localStorage.getItem("token");
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [formData, setFormData] = useState({
     catalogo: "",
@@ -25,6 +31,7 @@ const ProductCatalog = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -50,6 +57,7 @@ const ProductCatalog = () => {
 
   async function fetchProductoAndStoreInSession() {
     setLoading(true);
+    setLoadingMessage("Cargando productos...");
     try {
       const response = await fetch(`${BACKEND_URL}/producto`);
       const data = await response.json();
@@ -59,6 +67,7 @@ const ProductCatalog = () => {
       console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
+      setLoadingMessage("");
     }
   }
 
@@ -169,6 +178,7 @@ const ProductCatalog = () => {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(producto),
           }
@@ -214,6 +224,7 @@ const ProductCatalog = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(producto),
         });
@@ -262,9 +273,40 @@ const ProductCatalog = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const subirArchivoExcel = async (excel) => {
+    setLoading(true);
+    setLoadingMessage("Podria tardar unos minutos...");
+    const formData = new FormData();
+    formData.append("file", excel);
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/excel/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        setLoadingMessage("Actualizando lista de productos...");
+        await fetchProductoAndStoreInSession();
+
+        setLoading(false);
+        setLoadingMessage("");
+
+        console.log("Excel uploaded successfully");
+      } else {
+        console.error("Error uploading excel");
+      }
+    } catch (error) {
+      console.error("Error fetching and storing data:", error);
+    }
+    setIsExcelModalOpen(false);
+  };
+
   return (
     <>
-      {!loading && (
         <div className="md:ml-20">
           <div className="p-6 max-w-7xl mx-auto">
             <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pl-10 lg:pl-0">
@@ -278,12 +320,20 @@ const ProductCatalog = () => {
                   onChange={handleSearch}
                 />
               </div>
-              <button
-                onClick={handleAddProduct}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <FiPlus /> Agregar Producto
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsExcelModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <FiBook /> Actualizar lista de productos
+                </button>
+                <button
+                  onClick={handleAddProduct}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <FiPlus /> Agregar Producto
+                </button>
+              </div>
             </div>
 
             <div className="overflow-x-auto bg-white rounded-lg shadow">
@@ -526,9 +576,26 @@ const ProductCatalog = () => {
                 </div>
               </div>
             )}
+
+            {/* Excel Modal */}
+            <ExcelInputModal
+              isOpen={isExcelModalOpen}
+              onClose={() => setIsExcelModalOpen(false)}
+              onSubmit={(excel) => {
+                subirArchivoExcel(excel);
+              }}
+            />
+
+            <OverlayLoading
+              message={"Cargando..."}
+              additionalMessage={loadingMessage}
+              isOpen={loading}
+              size={"medium"}
+              backgroundColor={"rgba(0, 0, 0, 0.5)"}
+              textColor={"text-white"}
+            />
           </div>
         </div>
-      )}
     </>
   );
 };

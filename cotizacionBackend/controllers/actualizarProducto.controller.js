@@ -23,7 +23,7 @@ exports.actualizarProductos = async (req, res) => {
             // Buscar o crear el modelo
             const [modelo, created] = await db.modelo.findOrCreate({
                 where: { nombre: MODELO },
-                defaults: { unidad: UNIDAD }
+                defaults: { unidad: UNIDAD, usuarioId: req.user.id }
             })
 
             // Buscar o actualizar el producto
@@ -32,7 +32,8 @@ exports.actualizarProductos = async (req, res) => {
                 nombre: DESCRIP,
                 precio: PVA,
                 esTemporal: false,
-                modeloId: modelo.id // Suponiendo que tienes una relación entre Producto y Modelo
+                modeloId: modelo.id,
+                usuarioId: req.user.id
             })
         }
 

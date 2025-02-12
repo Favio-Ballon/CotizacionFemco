@@ -8,9 +8,11 @@ import {
   FiArchive,
   FiInfo,
 } from "react-icons/fi";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const Sidebar = () => {
+  const token = localStorage.getItem("token");
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [activeLink, setActiveLink] = useState("");
@@ -39,7 +41,6 @@ const Sidebar = () => {
       setActiveLink("dashboard");
     }
 
-
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -51,7 +52,29 @@ const Sidebar = () => {
       setShowText(false);
     }
   }, [isExpanded]);
-  
+
+  useEffect(() => {
+    verifyToken();
+  }, []);
+
+  const verifyToken = () => {
+    if (!token) {
+      navigate("/login");
+    }
+    try {
+      const decodedToken = jwtDecode(token);
+      const currentTime = Date.now() / 1000; // current time in seconds
+
+      if (decodedToken.exp < currentTime) {
+        console.error("Token expired");
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+      navigate("/login");
+    }
+  };
 
   const navigationItems = useMemo(
     () => [

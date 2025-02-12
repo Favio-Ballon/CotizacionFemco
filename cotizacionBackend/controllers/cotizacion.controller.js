@@ -25,7 +25,9 @@ exports.listCotizacionById = (req, res) => {
                 {
                     association: 'productos',
                     include: ['modelo']
-                }
+                },
+                'usuario'
+
             ]
         })
         .then((data) => {
@@ -72,7 +74,7 @@ exports.createCotizacion = async (req, res) => {
     const fechaToday = new Date()
 
     const cotizacion = {
-        usuarioId: req.body.usuarioId,
+        usuarioId: req.user.id ?? null,
         nombre: req.body.nombre,
         total: req.body.total,
         fecha: fechaToday,

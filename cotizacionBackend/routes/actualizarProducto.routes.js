@@ -9,6 +9,7 @@ module.exports = (app) => {
     // Use the custom middleware to handle the file upload and validation
     router.post(
         '/upload',
+        authMiddleware,
         uploadAndValidateExcel,
         controller.actualizarProductos
     )

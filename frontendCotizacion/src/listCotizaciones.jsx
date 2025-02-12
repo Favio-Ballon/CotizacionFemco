@@ -13,13 +13,19 @@ const QuotationList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [cotizaciones, setCotizaciones] = useState([]);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     fetchCotizaciones();
   }, []);
 
   const fetchCotizaciones = async () => {
-    const response = await fetch(`${BACKEND_URL}/cotizacion`);
+    const response = await fetch(`${BACKEND_URL}/cotizacion`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+    );
     const data = await response.json();
     setCotizaciones(data);
   };

@@ -6,17 +6,20 @@ import html2canvas from "html2canvas";
 import { useParams } from "react-router-dom";
 import ModalTelefono from "./components/modalTelefono.jsx";
 import { BACKEND_URL } from "./main.jsx";
+import OverlayLoading from "./components/OverlayLoading.jsx";
 
 const QuotationDocument = () => {
+  const token = localStorage.getItem("token");
   const [currentDate] = useState(new Date());
   const quotationRef = useRef(null); // Ref to capture the HTML content
   const { id } = useParams();
+  const [loading, setLoading] = useState(true);
 
   const [companyDetails, setCompanyDetails] = useState({
     name: "FEMCO",
-    address: "Agencia SP 4to anillo #4210",
-    email: "femco.sp.scz@gmail.com",
-    phone: "79373415",
+    address: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    email: "",
+    phone: "",
   });
 
   const [clientInfo, setClientInfo] = useState({
@@ -47,12 +50,17 @@ const QuotationDocument = () => {
 
   const getDatosCotizacion = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/cotizacion/${id}`);
+      const response = await fetch(`${BACKEND_URL}/cotizacion/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
+      console.log(data);
       setClientInfo({
         name: data.nombre,
         location: "Santa Cruz",
-        quotedBy: "Eliana Alvarez",
+        quotedBy: data.usuario?.nombre + " " + data.usuario?.apellido,
       });
 
       // product may be a single item or an array of items
@@ -73,11 +81,12 @@ const QuotationDocument = () => {
 
       setProducts(products);
 
+      //TODO agregar firma
       setCompanyDetails({
         name: "FEMCO",
-        address: "Agencia SP 4to anillo entre Av.Banzer y Beni #4210",
-        email: "femco.sp.scz@gmail.com",
-        phone: "79373415",
+        address: data.usuario?.direccion,
+        email: data.usuario?.correo,
+        phone: data.usuario?.telefono,
       });
 
       var formaPago = "";
@@ -118,6 +127,7 @@ const QuotationDocument = () => {
       setImagen(data.imagen ? data.imagen : "");
 
       document.title = `Cotizacion - ${clientInfo.name}`;
+      setLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -125,25 +135,27 @@ const QuotationDocument = () => {
 
   const handlePrint = async () => {
     const element = quotationRef.current; // Get the HTML content
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: false,
-  });
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+    });
 
-  const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF({
-    unit: "mm",
-    format: "a4",
-    orientation: "portrait",
-  });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      unit: "mm",
+      format: "a4",
+      orientation: "portrait",
+    });
 
-  const imgProps = pdf.getImageProperties(imgData);
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-  pdf.save(`Cotizacion_${clientInfo.name}_${format(currentDate, "yyyyMMdd")}.pdf`);
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(
+      `Cotizacion_${clientInfo.name}_${format(currentDate, "yyyyMMdd")}.pdf`
+    );
   };
 
   const HeaderComponent = () => (
@@ -385,6 +397,14 @@ const QuotationDocument = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handlePhoneNumberSubmit}
+      />
+
+      <OverlayLoading isOpen={loading}
+      message={"Cargando cotizacion..."}
+      additionalMessage={""}
+      size={"medium"}
+      backgroundColor={"rgba(0, 0, 0, 0.5)"}
+      textColor={"text-white"}
       />
     </div>
   );

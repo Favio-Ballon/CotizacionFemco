@@ -11,7 +11,7 @@ module.exports = (app) => {
     router.put('/:id', controller.updateProducto)
     router.delete('/:id', controller.deleteProducto)
 
-    router.post('/create', controller.createProductoWeb)
+    router.post('/create',authMiddleware, controller.createProductoWeb)
     router.put('/update/:id', controller.updateProductoWeb)
     router.post('/temporal', controller.createProductoTemporal)
 
