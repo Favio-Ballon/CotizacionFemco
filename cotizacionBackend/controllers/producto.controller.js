@@ -4,7 +4,10 @@ const { isRequestValid } = require('../utils/request.utils')
 exports.listProducto = (req, res) => {
     db.producto
         .findAll({
-            include: 'modelo'
+            include: 'modelo',
+            where: {
+                usuarioId: req.userId
+            }
         })
         .then((data) => {
             res.send(data)
@@ -21,7 +24,11 @@ exports.listProductoById = (req, res) => {
     const id = req.params.id
 
     db.producto
-        .findByPk(id)
+        .findByPk(id, {
+            where: {
+                usuarioId: req.userId
+            }
+        })
         .then((data) => {
             if (data) {
                 res.send(data)
@@ -52,7 +59,7 @@ exports.createProducto = async (req, res) => {
         nombre: req.body.nombre,
         precio: req.body.precio,
         modeloId: req.body.modeloId,
-        usuarioId: req.body.usuarioId ?? null,
+        usuarioId: req.user.id ?? null,
         esTemporal: req.body.esTemporal ?? false
     }
 
@@ -100,7 +107,7 @@ exports.updateProducto = async (req, res) => {
             res.status(500).send({
                 message:
                     err.message ||
-                    `Ocurrió un error al actualizar el producto con id ${id}.`
+                    `Ocurrió un error al actualizar el producto con id ${catalogo}.`
             })
         })
 }
@@ -112,7 +119,7 @@ exports.deleteProducto = async (req, res) => {
 
     if (!producto) {
         res.status(404).send({
-            message: `No se encontró el producto con id ${id}.`
+            message: `No se encontró el producto con id ${catalogo}.`
         })
         return
     }
@@ -128,7 +135,7 @@ exports.deleteProducto = async (req, res) => {
             res.status(500).send({
                 message:
                     err.message ||
-                    `Ocurrió un error al eliminar el producto con id ${id}.`
+                    `Ocurrió un error al eliminar el producto con id ${catalogo}.`
             })
         })
 }

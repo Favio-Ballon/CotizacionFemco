@@ -5,11 +5,11 @@ module.exports = (app) => {
 
     const controller = require('../controllers/modelo.controller.js')
 
-    router.get('/', controller.listModelo)
-    router.get('/:id', controller.listModeloById)
-    router.post('/', controller.createModelo)
-    router.put('/:id', controller.updateModelo)
-    router.delete('/:id', controller.deleteModelo)
+    router.get('/', authMiddleware, controller.listModelo)
+    router.get('/:id', authMiddleware, controller.listModeloById)
+    router.post('/', authMiddleware, controller.createModelo)
+    router.put('/:id', authMiddleware, controller.updateModelo)
+    router.delete('/:id', authMiddleware, controller.deleteModelo)
 
     app.use('/modelo', router)
 }

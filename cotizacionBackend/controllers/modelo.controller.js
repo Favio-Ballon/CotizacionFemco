@@ -3,7 +3,11 @@ const { isRequestValid } = require('../utils/request.utils')
 
 exports.listModelo = (req, res) => {
     db.modelo
-        .findAll()
+        .findAll({
+            where: {
+                usuarioId: req.user.id
+            }
+        })
         .then((data) => {
             res.send(data)
         })
@@ -20,7 +24,10 @@ exports.listModeloById = (req, res) => {
 
     db.modelo
         .findByPk(id, {
-            include: 'productos'
+            include: 'productos',
+            where: {
+                usuarioId: req.userId
+            }
         })
         .then((data) => {
             if (data) {
@@ -50,7 +57,7 @@ exports.createModelo = async (req, res) => {
     const modelo = {
         nombre: req.body.nombre,
         unidad: req.body.unidad ?? 'pzs',
-        usuarioId: req.body.usuarioId ?? null
+        usuarioId: req.user.id ?? null
     }
 
     db.modelo
