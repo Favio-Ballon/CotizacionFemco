@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
 import { BiLoaderAlt } from "react-icons/bi";
+import { BACKEND_URL } from "./main.jsx";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    username: "",
-    password: "",
+    usuario: "",
+    contrasena: "",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,13 +28,13 @@ const LoginPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.username.trim()) {
-      newErrors.username = "El usuario es requerido";
+    if (!formData.usuario.trim()) {
+      newErrors.usuario = "El usuario es requerido";
     }
-    if (!formData.password.trim()) {
-      newErrors.password = "La contraseña es requerida";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
+    if (!formData.contrasena.trim()) {
+      newErrors.contrasena = "La contraseña es requerida";
+    } else if (formData.contrasena.length < 6) {
+      newErrors.contrasena = "La contraseña debe tener al menos 6 caracteres";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -44,22 +47,29 @@ const LoginPage = () => {
     setIsLoading(true);
     setLoginError("");
 
+    setIsLoading(true);
+    setLoginError("");
+
     try {
       // endpoint to login
-      await new Promise(
-        fetch("https://jsonplaceholder.typicode.com/posts", {
-            method: "POST",
-            body: JSON.stringify(formData),
-            headers: {
-                "Content-Type": "application/json",
-            },
-            })
-      );
-      // Add actual login logic here
-      throw new Error("Contraseña o usuario incorrecto");
+      const response = await fetch(`${BACKEND_URL}/usuario/login`, {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Usuario o contraseña incorrectos");
+      }
+
+      const data = await response.json();
+      localStorage.setItem("token", data.token);
+      navigate("/");
     } catch (error) {
       setLoginError(error.message);
-      setFormData((prev) => ({ ...prev, password: "" }));
+      setFormData((prev) => ({ ...prev, contrasena: "" }));
     } finally {
       setIsLoading(false);
     }
@@ -79,18 +89,19 @@ const LoginPage = () => {
               <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                name="username"
-                value={formData.username}
+                name="usuario"
+                value={formData.usuario}
                 onChange={handleChange}
                 placeholder="Usuario"
                 className={`w-full pl-10 pr-4 py-2 border ${
-                  errors.username ? "border-red-500" : "border-gray-300"
+                  errors.usuario ? "border-red-500" : "border-gray-300"
                 } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200`}
                 aria-label="Usuario"
+                autoComplete="username"
               />
             </div>
-            {errors.username && (
-              <p className="mt-1 text-sm text-red-500">{errors.username}</p>
+            {errors.usuario && (
+              <p className="mt-1 text-sm text-red-500">{errors.usuario}</p>
             )}
           </div>
 
@@ -99,18 +110,19 @@ const LoginPage = () => {
               <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="password"
-                name="password"
-                value={formData.password}
+                name="contrasena"
+                value={formData.contrasena}
                 onChange={handleChange}
                 placeholder="Contraseña"
                 className={`w-full pl-10 pr-4 py-2 border ${
-                  errors.password ? "border-red-500" : "border-gray-300"
+                  errors.contrasena ? "border-red-500" : "border-gray-300"
                 } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200`}
                 aria-label="Contraseña"
+                autoComplete="current-password"
               />
             </div>
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+            {errors.contrasena && (
+              <p className="mt-1 text-sm text-red-500">{errors.contrasena}</p>
             )}
           </div>
 
@@ -122,7 +134,7 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            disabled={isLoading || !formData.username || !formData.password}
+            disabled={isLoading || !formData.usuario || !formData.contrasena}
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
           >
             {isLoading ? (
