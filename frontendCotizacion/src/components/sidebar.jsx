@@ -7,6 +7,7 @@ import {
   FiPackage,
   FiArchive,
   FiInfo,
+  FiLogOut,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
@@ -17,6 +18,8 @@ const Sidebar = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [activeLink, setActiveLink] = useState("");
   const [showText, setShowText] = useState(false);
+  const [nombre, setNombre] = useState("");
+  const [correo, setCorreo] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,7 +67,8 @@ const Sidebar = () => {
     try {
       const decodedToken = jwtDecode(token);
       const currentTime = Date.now() / 1000; // current time in seconds
-
+      setNombre(decodedToken.nombre);
+      setCorreo(decodedToken.correo);
       if (decodedToken.exp < currentTime) {
         console.error("Token expired");
         localStorage.removeItem("token");
@@ -82,6 +86,7 @@ const Sidebar = () => {
       { id: "productos", label: "Productos", icon: FiPackage },
       { id: "cotizaciones", label: "Cotizaciones", icon: FiArchive },
       { id: "dashboard", label: "Dashboard", icon: FiInfo },
+      { id: "logout", label: "Cerrar sesión", icon: FiLogOut },
     ],
     []
   );
@@ -94,7 +99,12 @@ const Sidebar = () => {
         } ${activeLink === id ? "bg-gray-700" : "hover:bg-gray-700"}`}
         onClick={() => {
           setActiveLink(id);
-          navigate(`/${id}`);
+          if (id === "logout") {
+            localStorage.removeItem("token");
+            navigate("/login");
+          } else {
+            navigate(`/${id}`);
+          }
         }}
         role="button"
         tabIndex={0}
@@ -169,8 +179,8 @@ const Sidebar = () => {
               <FiUser className="w-6 h-6" />
               {showText && isExpanded && (
                 <div className="ml-3">
-                  <p className="text-sm font-medium">John Doe</p>
-                  <p className="text-xs text-gray-400">john@example.com</p>
+                  <p className="text-sm font-medium">{nombre ?? ""}</p>
+                  <p className="text-xs text-gray-400">{correo ?? ""}</p>
                 </div>
               )}
             </div>
