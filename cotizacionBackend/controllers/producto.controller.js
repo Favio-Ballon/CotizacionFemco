@@ -6,7 +6,7 @@ exports.listProducto = (req, res) => {
         .findAll({
             include: 'modelo',
             where: {
-                usuarioId: req.userId
+                usuarioId: req.user.id
             }
         })
         .then((data) => {
@@ -26,7 +26,7 @@ exports.listProductoById = (req, res) => {
     db.producto
         .findByPk(id, {
             where: {
-                usuarioId: req.userId
+                usuarioId: req.user.id
             }
         })
         .then((data) => {

@@ -24,8 +24,7 @@ const QuotationList = () => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
-    );
+    });
     const data = await response.json();
     setCotizaciones(data);
   };
@@ -69,12 +68,13 @@ const QuotationList = () => {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8 lg:ml-20">
+    {/* //TODO fix this padding margin */}
+      <div className="container mx-auto px-4 py-8 lg:pl-20 max-w-full">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Cotizaciones</h1>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 ">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="relative">
               <FiSearch className="absolute left-3 top-3 text-gray-400" />

@@ -59,7 +59,11 @@ const ProductCatalog = () => {
     setLoading(true);
     setLoadingMessage("Cargando productos...");
     try {
-      const response = await fetch(`${BACKEND_URL}/producto`);
+      const response = await fetch(`${BACKEND_URL}/producto`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
       sessionStorage.setItem("productoData", JSON.stringify(data));
       setProducts(data);
@@ -77,6 +81,10 @@ const ProductCatalog = () => {
   };
 
   const filteredProducts = useMemo(() => {
+    if (!Array.isArray(products)) {
+      fetchProductoAndStoreInSession();
+      return [];
+    }
     return products.filter(
       (product) =>
         product.catalogo
@@ -307,295 +315,295 @@ const ProductCatalog = () => {
 
   return (
     <>
-        <div className="md:ml-20">
-          <div className="p-6 max-w-7xl mx-auto">
-            <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pl-10 lg:pl-0">
-              <div className="relative flex-1 max-w-md">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Buscar por modelo o catálogo..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={searchTerm}
-                  onChange={handleSearch}
-                />
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setIsExcelModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <FiBook /> Actualizar lista de productos
-                </button>
-                <button
-                  onClick={handleAddProduct}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <FiPlus /> Agregar Producto
-                </button>
-              </div>
+      <div className="md:ml-20">
+        <div className="p-6 max-w-7xl mx-auto">
+          <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pl-10 lg:pl-0">
+            <div className="relative flex-1 max-w-md">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por modelo o catálogo..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={searchTerm}
+                onChange={handleSearch}
+              />
             </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsExcelModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <FiBook /> Actualizar lista de productos
+              </button>
+              <button
+                onClick={handleAddProduct}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <FiPlus /> Agregar Producto
+              </button>
+            </div>
+          </div>
 
-            <div className="overflow-x-auto bg-white rounded-lg shadow">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort("catalogo")}
-                    >
-                      <div className="flex items-center">
-                        Catálogo
-                        {sortConfig.key === "catalogo" &&
-                          (sortConfig.direction === "asc" ? (
-                            <FiArrowUp className="ml-1" />
-                          ) : (
-                            <FiArrowDown className="ml-1" />
-                          ))}
+          <div className="overflow-x-auto bg-white rounded-lg shadow">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort("catalogo")}
+                  >
+                    <div className="flex items-center">
+                      Catálogo
+                      {sortConfig.key === "catalogo" &&
+                        (sortConfig.direction === "asc" ? (
+                          <FiArrowUp className="ml-1" />
+                        ) : (
+                          <FiArrowDown className="ml-1" />
+                        ))}
+                    </div>
+                  </th>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort("nombre")}
+                  >
+                    <div className="flex items-center">
+                      Nombre
+                      {sortConfig.key === "nombre" &&
+                        (sortConfig.direction === "asc" ? (
+                          <FiArrowUp className="ml-1" />
+                        ) : (
+                          <FiArrowDown className="ml-1" />
+                        ))}
+                    </div>
+                  </th>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort("precio")}
+                  >
+                    <div className="flex items-center">
+                      Precio
+                      {sortConfig.key === "precio" &&
+                        (sortConfig.direction === "asc" ? (
+                          <FiArrowUp className="ml-1" />
+                        ) : (
+                          <FiArrowDown className="ml-1" />
+                        ))}
+                    </div>
+                  </th>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort("modelo")}
+                  >
+                    <div className="flex items-center">
+                      Modelo
+                      {sortConfig.key === "modelo" &&
+                        (sortConfig.direction === "asc" ? (
+                          <FiArrowUp className="ml-1" />
+                        ) : (
+                          <FiArrowDown className="ml-1" />
+                        ))}
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {item.map((product) => (
+                  <tr key={product.catalogo} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {product.catalogo}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {product.nombre}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {product.precio} Bs
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {product.modelo?.nombre}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleEditProduct(product)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(product)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <FiTrash2 />
+                        </button>
                       </div>
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort("nombre")}
-                    >
-                      <div className="flex items-center">
-                        Nombre
-                        {sortConfig.key === "nombre" &&
-                          (sortConfig.direction === "asc" ? (
-                            <FiArrowUp className="ml-1" />
-                          ) : (
-                            <FiArrowDown className="ml-1" />
-                          ))}
-                      </div>
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort("precio")}
-                    >
-                      <div className="flex items-center">
-                        Precio
-                        {sortConfig.key === "precio" &&
-                          (sortConfig.direction === "asc" ? (
-                            <FiArrowUp className="ml-1" />
-                          ) : (
-                            <FiArrowDown className="ml-1" />
-                          ))}
-                      </div>
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort("modelo")}
-                    >
-                      <div className="flex items-center">
-                        Modelo
-                        {sortConfig.key === "modelo" &&
-                          (sortConfig.direction === "asc" ? (
-                            <FiArrowUp className="ml-1" />
-                          ) : (
-                            <FiArrowDown className="ml-1" />
-                          ))}
-                      </div>
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {item.map((product) => (
-                    <tr key={product.catalogo} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {product.catalogo}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {product.nombre}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {product.precio} Bs
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {product.modelo?.nombre}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex gap-3">
-                          <button
-                            onClick={() => handleEditProduct(product)}
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            <FiEdit2 />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(product)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center mt-4">
+            <div>
+              <span className="text-sm text-gray-700">
+                Mostrando {item.length} de {totalItems} productos
+              </span>
             </div>
-
-            {/* Pagination */}
-            <div className="flex justify-between items-center mt-4">
-              <div>
-                <span className="text-sm text-gray-700">
-                  Mostrando {item.length} de {totalItems} productos
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Anterior
-                </button>
-                <span className="px-4 py-2 text-sm text-gray-700">
-                  Página {page} de {totalPages}
-                </span>
-                <button
-                  onClick={() =>
-                    setPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  disabled={page === totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Siguiente
-                </button>
-              </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                disabled={page === 1}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Anterior
+              </button>
+              <span className="px-4 py-2 text-sm text-gray-700">
+                Página {page} de {totalPages}
+              </span>
+              <button
+                onClick={() =>
+                  setPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={page === totalPages}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Siguiente
+              </button>
             </div>
+          </div>
 
-            {/* Add/Edit Modal */}
-            {isModalOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                  <h2 className="text-xl font-semibold mb-4">
-                    {selectedProduct ? "Editar Producto" : "Agregar Producto"}
-                  </h2>
-                  <form onSubmit={handleFormSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Catálogo
-                      </label>
-                      <input
-                        type="text"
-                        name="catalogo"
-                        value={formData.catalogo}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Nombre
-                      </label>
-                      <input
-                        type="text"
-                        name="nombre"
-                        value={formData.nombre}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Precio
-                      </label>
-                      <input
-                        type="number"
-                        name="precio"
-                        value={formData.precio}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        required
-                        step="0.01"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Modelo
-                      </label>
-                      <input
-                        type="text"
-                        name="modelo"
-                        value={formData.modelo}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        required
-                      />
-                    </div>
-                    <div className="flex justify-end gap-3 mt-6">
-                      <button
-                        type="button"
-                        onClick={() => setIsModalOpen(false)}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                      >
-                        {selectedProduct ? "Guardar Cambios" : "Agregar"}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-
-            {/* Delete Confirmation Modal */}
-            {isDeleteModalOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg p-6 w-full max-w-sm">
-                  <h2 className="text-xl font-semibold mb-4">
-                    Confirmar Eliminación
-                  </h2>
-                  <p className="text-gray-600 mb-6">
-                    ¿Está seguro de que desea eliminar este producto?
-                  </p>
-                  <div className="flex justify-end gap-3">
+          {/* Add/Edit Modal */}
+          {isModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h2 className="text-xl font-semibold mb-4">
+                  {selectedProduct ? "Editar Producto" : "Agregar Producto"}
+                </h2>
+                <form onSubmit={handleFormSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Catálogo
+                    </label>
+                    <input
+                      type="text"
+                      name="catalogo"
+                      value={formData.catalogo}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Nombre
+                    </label>
+                    <input
+                      type="text"
+                      name="nombre"
+                      value={formData.nombre}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Precio
+                    </label>
+                    <input
+                      type="number"
+                      name="precio"
+                      value={formData.precio}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      required
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Modelo
+                    </label>
+                    <input
+                      type="text"
+                      name="modelo"
+                      value={formData.modelo}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3 mt-6">
                     <button
-                      onClick={() => setIsDeleteModalOpen(false)}
+                      type="button"
+                      onClick={() => setIsModalOpen(false)}
                       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                     >
                       Cancelar
                     </button>
                     <button
-                      onClick={handleDeleteConfirm}
-                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                     >
-                      Eliminar
+                      {selectedProduct ? "Guardar Cambios" : "Agregar"}
                     </button>
                   </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Delete Confirmation Modal */}
+          {isDeleteModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg p-6 w-full max-w-sm">
+                <h2 className="text-xl font-semibold mb-4">
+                  Confirmar Eliminación
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  ¿Está seguro de que desea eliminar este producto?
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setIsDeleteModalOpen(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Excel Modal */}
-            <ExcelInputModal
-              isOpen={isExcelModalOpen}
-              onClose={() => setIsExcelModalOpen(false)}
-              onSubmit={(excel) => {
-                subirArchivoExcel(excel);
-              }}
-            />
+          {/* Excel Modal */}
+          <ExcelInputModal
+            isOpen={isExcelModalOpen}
+            onClose={() => setIsExcelModalOpen(false)}
+            onSubmit={(excel) => {
+              subirArchivoExcel(excel);
+            }}
+          />
 
-            <OverlayLoading
-              message={"Cargando..."}
-              additionalMessage={loadingMessage}
-              isOpen={loading}
-              size={"medium"}
-              backgroundColor={"rgba(0, 0, 0, 0.5)"}
-              textColor={"text-white"}
-            />
-          </div>
+          <OverlayLoading
+            message={"Cargando..."}
+            additionalMessage={loadingMessage}
+            isOpen={loading}
+            size={"medium"}
+            backgroundColor={"rgba(0, 0, 0, 0.5)"}
+            textColor={"text-white"}
+          />
         </div>
+      </div>
     </>
   );
 };
