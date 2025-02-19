@@ -15,6 +15,7 @@ db.grupo = require('./grupo.js')(sequelize, Sequelize)
 db.modelo = require('./modelo.js')(sequelize, Sequelize)
 db.usuario = require('./usuario.js')(sequelize, Sequelize)
 db.cotizacion = require('./cotizacion.js')(sequelize, Sequelize)
+db.productoGrupo = require('./productoGrupo.js')(sequelize, Sequelize)
 
 //producto tiene modelo
 db.producto.belongsTo(db.modelo, {
@@ -28,12 +29,12 @@ db.modelo.hasMany(db.producto, {
 
 //producto puede estar en n grupos y viceversa
 db.producto.belongsToMany(db.grupo, {
-    through: 'producto_grupo',
+    through: db.productoGrupo,
     as: 'grupos',
     foreignKey: 'catalogo'
 })
 db.grupo.belongsToMany(db.producto, {
-    through: 'producto_grupo',
+    through: db.productoGrupo,
     as: 'productos',
     foreignKey: 'grupoId'
 })
@@ -94,13 +95,13 @@ db.grupo.belongsTo(db.usuario, {
 
 const init = async () => {
     try {
-        await sequelize.sync();
-        console.log('Database synchronized');
+        await sequelize.sync()
+        console.log('Database synchronized')
     } catch (error) {
-        console.error('Error synchronizing database:', error);
+        console.error('Error synchronizing database:', error)
     }
-};
+}
 
-init();
+init()
 
 module.exports = db

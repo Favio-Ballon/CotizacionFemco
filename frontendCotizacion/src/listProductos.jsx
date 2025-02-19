@@ -7,11 +7,13 @@ import {
   FiArrowUp,
   FiArrowDown,
   FiBook,
+  FiPackage,
 } from "react-icons/fi";
 import { BACKEND_URL } from "./main.jsx";
 import ExcelInputModal from "./components/overlayExce.jsx";
 import OverlayLoading from "./components/OverlayLoading.jsx";
 import { set } from "date-fns";
+import GrupoOverlay from "./components/cotizar/overlayGrupo.jsx";
 
 const ProductCatalog = () => {
   const token = localStorage.getItem("token");
@@ -27,6 +29,7 @@ const ProductCatalog = () => {
     precio: "",
     modelo: "",
   });
+  const [showGrupoOverlay, setShowGrupoOverlay] = useState(false);
 
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
@@ -59,7 +62,7 @@ const ProductCatalog = () => {
     setLoading(true);
     setLoadingMessage("Cargando productos...");
     try {
-      const response = await fetch(`${BACKEND_URL}/producto`,{
+      const response = await fetch(`${BACKEND_URL}/producto`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -317,8 +320,8 @@ const ProductCatalog = () => {
     <>
       <div className="md:ml-20">
         <div className="p-6 max-w-7xl mx-auto">
-          <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pl-10 lg:pl-0">
-            <div className="relative flex-1 max-w-md">
+          <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pl-10 lg:pl-0 flex flex-wrap">
+            <div className="relative flex-1 max-w-md ">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
@@ -328,18 +331,29 @@ const ProductCatalog = () => {
                 onChange={handleSearch}
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
               <button
                 onClick={() => setIsExcelModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors items-center justify-center"
               >
-                <FiBook /> Actualizar lista de productos
+                <FiBook />{" "}
+                <span className="hidden md:inline">
+                  Actualizar lista de productos
+                </span>
+              </button>
+              <button
+                onClick={() => setShowGrupoOverlay(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors items-center justify-center"
+              >
+                <FiPackage />{" "}
+                <span className="hidden md:inline">Crear/editar Grupos</span>
               </button>
               <button
                 onClick={handleAddProduct}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors items-center justify-center"
               >
-                <FiPlus /> Agregar Producto
+                <FiPlus />{" "}
+                <span className="hidden md:inline">Agregar Producto</span>
               </button>
             </div>
           </div>
@@ -447,13 +461,13 @@ const ProductCatalog = () => {
           </div>
 
           {/* Pagination */}
-          <div className="flex justify-between items-center mt-4">
-            <div>
+          <div >
+            <div className="text-sm text-gray-700 hidden md:inline">
               <span className="text-sm text-gray-700">
                 Mostrando {item.length} de {totalItems} productos
               </span>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 md:mt-0 mt-4 items-center justify-center md:justify-end md:items-end">
               <button
                 onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                 disabled={page === 1}
@@ -601,6 +615,12 @@ const ProductCatalog = () => {
             size={"medium"}
             backgroundColor={"rgba(0, 0, 0, 0.5)"}
             textColor={"text-white"}
+          />
+
+          <GrupoOverlay
+            isOpen={showGrupoOverlay}
+            onClose={() => setShowGrupoOverlay(false)}
+            isEdit={true}
           />
         </div>
       </div>

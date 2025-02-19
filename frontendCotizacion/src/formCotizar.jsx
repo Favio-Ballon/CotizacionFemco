@@ -3,6 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FaTrash, FaEdit, FaPrint, FaSave, FaPlus } from "react-icons/fa";
 import ProductInputModal from "./components/cotizar/overlayProductoTemporal.jsx";
 import { BACKEND_URL } from "./main.jsx";
+import Select from "react-select";
+import InventorySelectionOverlay from "./components/cotizar/overlayGrupo.jsx";
+import GrupoOverlay from "./components/cotizar/overlayGrupo.jsx";
 
 const QuotationForm = () => {
   const Navigate = useNavigate();
@@ -38,6 +41,10 @@ const QuotationForm = () => {
   const [modalProductoTemporal, setModalProductoTemporal] = useState(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const token = localStorage.getItem("token");
+
+  const [inputValue, setInputValue] = useState("");
+  const [filteredModelos, setFilteredModelos] = useState([]);
+  const [showGrupoOverlay, setShowGrupoOverlay] = useState(false);
 
   useEffect(() => {
     checkModeloInSession();
@@ -291,7 +298,7 @@ const QuotationForm = () => {
         nombre: producto.nombre,
       };
       setSeleccionarProducto([productoSeleccionado]);
-      
+
       setProductEntry({
         ...productEntry,
         catalogo: producto.catalogo,
@@ -305,32 +312,75 @@ const QuotationForm = () => {
     }
   };
 
-  const handleModelo = (e) => {
-    const inputValue = e.target.value.toLowerCase();
-    setProductEntry({
-      ...productEntry,
-      modelo: e.target.value,
-    });
-    console.log(datosModelo);
-    const modelo = datosModelo.find(
-      (m) => m.nombre.toLowerCase() === inputValue
-    );
+  const customStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: "white",
+      borderRadius: "0.375rem", // Tailwind rounded-md
+      borderWidth: state.isFocused ? "2px" : "0px", // Invisible border unless selected
+      borderColor: state.isFocused ? "black" : "transparent", // Black border when selected
+      boxShadow: "none", // No extra shadow
+      padding: "0px", // Adjust padding
+      minHeight: "1.25rem",
+    }),
+    menu: (provided) => ({
+      ...provided,
+      zIndex: 20, // Ensures dropdown is above other elements
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? "#3b82f6"
+        : state.isFocused
+        ? "#eff6ff"
+        : "white", // Tailwind blue shades
+      color: state.isSelected ? "white" : "black",
+      padding: "8px",
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      fontSize: "1rem", // Adjust text size
+    }),
+    dropdownIndicator: (provided) => ({
+      ...provided,
+      padding: "4px", // Reduce size of arrow
+    }),
+  };
 
-    console.log(modelo);
+  useEffect(() => {
+    if (inputValue.length >= 2) {
+      const filtered = datosModelo
+        .filter((m) =>
+          m.nombre.toLowerCase().includes(inputValue.toLowerCase())
+        )
+        .map((m) => ({
+          value: m.id,
+          label: m.nombre,
+        }));
+      setFilteredModelos(filtered);
+    } else {
+      setFilteredModelos([]);
+    }
+  }, [inputValue]);
 
-    if (!modelo) {
+  const handleInputChange = (value) => {
+    setInputValue(value);
+  };
+
+  const handleModelo = (selectedOption) => {
+    if (!selectedOption) {
       setErrors({ modelo: "Modelo no encontrado" });
       return;
-    } else if (modelo) {
-      setProductEntry({
-        ...productEntry,
-        modelo: modelo.nombre,
-      });
-      setErrors({});
-      setSeleccionarProducto(
-        datosProducto.filter((p) => p.modeloId === modelo.id)
-      );
     }
+
+    setProductEntry({
+      ...productEntry,
+      modelo: selectedOption.label,
+    });
+    setErrors({});
+    setSeleccionarProducto(
+      datosProducto.filter((p) => p.modeloId === selectedOption.value)
+    );
   };
 
   const handleProducto = (e) => {
@@ -521,7 +571,7 @@ const QuotationForm = () => {
 
   return (
     <>
-      <div className="min-h-screen lg:ml-20 bg-gray-100 p-6">
+      <div className="min-h-screen md:ml-20 bg-gray-100 p-6">
         <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-lg">
           <div className="p-6 grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Left Column - Form */}
@@ -578,9 +628,18 @@ const QuotationForm = () => {
                 </div>
               </div>
 
-              <h2 className="text-2xl font-bold text-gray-800 mt-8">
-                Producto
-              </h2>
+              <div className="space-y-4 md:grid md:grid-cols-2">
+                <h2 className="text-2xl font-bold text-gray-800 mt-8 md:my-auto my-auto">
+                  Producto
+                </h2>
+
+                <button
+                  onClick={() => setShowGrupoOverlay(true)}
+                  className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center justify-center gap-2"
+                >
+                  <FaPlus /> Añadir Grupo
+                </button>
+              </div>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -604,13 +663,20 @@ const QuotationForm = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     Modelo
                   </label>
-                  <input
-                    type="text"
-                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                      errors.modelo ? "border-red-500" : ""
-                    }`}
-                    value={productEntry.modelo || ""}
-                    onChange={(e) => handleModelo(e)}
+                  <Select
+                    options={filteredModelos}
+                    isClearable
+                    onInputChange={handleInputChange}
+                    onChange={handleModelo}
+                    isSearchable
+                    styles={customStyles}
+                    className="mt-1 block w-full"
+                    placeholder="Seleccionar Modelo..."
+                    noOptionsMessage={() =>
+                      inputValue.length < 2
+                        ? "Escriba al menos 2 letras"
+                        : "Sin resultados"
+                    }
                   />
                   {errors.modelo && (
                     <p className="text-red-500 text-sm mt-1">{errors.modelo}</p>
@@ -902,7 +968,7 @@ const QuotationForm = () => {
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
                 <button
                   className="flex-1 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 flex items-center justify-center gap-2"
                   onClick={handleGuardarCotizacion}
@@ -989,6 +1055,54 @@ const QuotationForm = () => {
           </div>
         </div>
       )}
+      <GrupoOverlay
+        isOpen={showGrupoOverlay}
+        onClose={() => setShowGrupoOverlay(false)}
+        isEdit={false}
+        onSubmit={async (cantidades) => {
+          console.log(cantidades);
+          var productosList = [];
+          for (const [catalogo, cantidad] of Object.entries(cantidades)) {
+            const producto = await datosProducto.find(
+              (p) => p.catalogo === Number(catalogo)
+            );
+            if (!producto) {
+              console.error("Producto not found");
+              continue;
+            }
+            const found = products.find(
+              (p) =>
+                p.modelo === producto.modelo.nombre &&
+                p.producto === producto.nombre
+            );
+            if (found) {
+              setErrors({ duplicate: "El producto ya existe" });
+            } else {
+              productosList.push({
+                catalogo: producto.catalogo,
+                modelo: producto.modelo.nombre,
+                producto: producto.nombre,
+                cantidad: cantidad,
+                price: producto.precio,
+              });
+            }
+          }
+          console.log(productosList);
+          setProducts([
+            ...products,
+            ...productosList.map((p) => ({
+              catalogo: p.catalogo,
+              modelo: p.modelo,
+              producto: p.producto,
+              cantidad: p.cantidad,
+              price: p.price,
+              id: Date.now(),
+              isTemporal: false,
+            })),
+          ]);
+          setShowGrupoOverlay(false);
+        }}
+      />
     </>
   );
 };

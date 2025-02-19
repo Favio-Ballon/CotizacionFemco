@@ -24,7 +24,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      const isNowMobile = window.innerWidth <= 768;
+      const isNowMobile = window.innerWidth <= 767;
       setIsMobile(isNowMobile);
       if (isNowMobile) setIsExpanded(false);
     };
