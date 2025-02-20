@@ -45,6 +45,10 @@ const QuotationForm = () => {
   const [inputValue, setInputValue] = useState("");
   const [filteredModelos, setFilteredModelos] = useState([]);
   const [showGrupoOverlay, setShowGrupoOverlay] = useState(false);
+  const [selectedModel, setSelectedModel] = useState({
+    id: 0,
+    name: "Seleccionar Modelo",
+  });
 
   useEffect(() => {
     checkModeloInSession();
@@ -306,6 +310,10 @@ const QuotationForm = () => {
         producto: producto.nombre,
         price: producto.precio,
       });
+      setSelectedModel({
+        id: producto.modelo.id,
+        name: producto.modelo.nombre,
+      });
       setErrors({});
 
       console.log(productoSeleccionado);
@@ -376,6 +384,10 @@ const QuotationForm = () => {
     setProductEntry({
       ...productEntry,
       modelo: selectedOption.label,
+    });
+    setSelectedModel({
+      id: selectedOption.value,
+      name: selectedOption.label,
     });
     setErrors({});
     setSeleccionarProducto(
@@ -548,7 +560,11 @@ const QuotationForm = () => {
   };
 
   const handleImprimirCotizacion = () => {
-    Navigate(`/cotizacion/${id}/preview`);
+    if (id) {
+      Navigate(`/cotizacion/${id}/preview`);
+    } else {
+      alert("Primero guarde la cotización para poder imprimir");
+    }
   };
 
   const handleResetForm = () => {
@@ -664,6 +680,7 @@ const QuotationForm = () => {
                     Modelo
                   </label>
                   <Select
+                    value={{ id: selectedModel.id, label: selectedModel.name }}
                     options={filteredModelos}
                     isClearable
                     onInputChange={handleInputChange}

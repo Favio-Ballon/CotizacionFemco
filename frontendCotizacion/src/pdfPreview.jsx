@@ -163,9 +163,17 @@ const QuotationDocument = () => {
         pdf.addPage();
         yOffset = 0; // Reset yOffset for the new page
       }
-      
 
-      pdf.addImage(imgData, "PNG", margin, yOffset, pdfWidth, imgHeight);
+      pdf.addImage(
+        imgData,
+        "PNG",
+        margin,
+        yOffset,
+        pdfWidth,
+        imgHeight,
+        undefined,
+        "FAST"
+      );
       return yOffset + imgHeight; // Return the new yOffset for the next chunk
     };
 
