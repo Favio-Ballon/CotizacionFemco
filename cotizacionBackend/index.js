@@ -43,7 +43,15 @@ db.sequelize
 require('./routes')(app)
 
 //make static files available
-app.use('/uploads/cotizacion', express.static('uploads/cotizacion'))
+app.use(
+    '/uploads/cotizacion',
+    express.static('uploads/cotizacion')
+)
+
+app.use(
+    '/uploads/firmas',
+    express.static('uploads/firmas')
+)
 
 app.post('/webhook', (req, res) => {
     console.log('Webhook received from GitHub')

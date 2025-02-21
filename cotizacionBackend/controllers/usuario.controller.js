@@ -2,6 +2,7 @@ const db = require('../models')
 const { isRequestValid } = require('../utils/request.utils')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const fs = require('fs')
 
 exports.listUsuario = (req, res) => {
     db.usuario
@@ -196,4 +197,60 @@ exports.login = async (req, res) => {
         usuario: usuario,
         token: token
     })
+}
+
+exports.uploadFirma = async (req, res) => {
+    const id = req.user.id
+
+    const usuario = await db.usuario.findByPk(id)
+
+    if (!usuario) {
+        res.status(404).send({
+            message: `No se encontró el usuario con id ${id}.`
+        })
+        return
+    }
+
+    const firma = uploadFirmaImagen(req, res)
+
+    usuario.firma = firma
+
+    usuario
+        .save()
+        .then((data) => {
+            res.send(data)
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                    err.message ||
+                    `Ocurrió un error al actualizar el usuario con id ${id}.`
+            })
+        })
+}
+
+const uploadFirmaImagen = (req, res) => {
+    if (req.files) {
+        console.log(req.files)
+        const file = req.files.firma
+        const extension = file.name.split('.').pop()
+        const fileName = req.user.id + '.' + extension
+        console.log(fileName)
+        const path = `./uploads/firmas/${fileName}`
+
+        if (!fs.existsSync('./uploads/firmas')) {
+            fs.mkdirSync('./uploads/firmas')
+        }
+
+        file.mv(path, (err) => {
+            if (err) {
+                console.error(err)
+                res.status(500).send({
+                    message: 'Ocurrió un error al subir la firma.'
+                })
+            }
+        })
+
+        return fileName
+    }
 }
