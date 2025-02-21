@@ -295,7 +295,7 @@ const QuotationDocument = () => {
               <div className="flex justify-end">
                 <p className="text-mg font-semibold pr-2">Subtotal:</p>
                 <p className="text-mg font-bold text-[#1b1464] print:text-[#1b1464]">
-                  {total.toFixed(2)} Bs.
+                  {subtotal.toFixed(2)} Bs.
                 </p>
               </div>
 

@@ -273,6 +273,7 @@ const ProductCatalog = () => {
           console.error("Error adding product");
         }
       } catch (error) {
+        alert("Error al agregar producto");
         console.error("Error fetching and storing data:", error);
       }
     }
@@ -461,7 +462,7 @@ const ProductCatalog = () => {
           </div>
 
           {/* Pagination */}
-          <div >
+          <div>
             <div className="text-sm text-gray-700 hidden md:inline">
               <span className="text-sm text-gray-700">
                 Mostrando {item.length} de {totalItems} productos
