@@ -67,9 +67,8 @@ const QuotationList = () => {
   };
 
   return (
-    <>
-    {/* //TODO fix this padding margin */}
-      <div className="container mx-auto px-4 py-8 lg:pl-20 max-w-full">
+    <div className="lg:ml-20">
+      <div className="container mx-auto px-4 py-8 max-w-full ">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Cotizaciones</h1>
         </div>
@@ -185,7 +184,7 @@ const QuotationList = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
