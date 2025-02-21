@@ -75,9 +75,24 @@ const QuotationForm = () => {
     //id no es new y es un numero
     if (id !== "new" && !isNaN(Number(id))) {
       // Fetch the quotation data from the server
+      localStorage.removeItem("products");
       fetchQuotationData(id);
+    } else {
+      const products = localStorage.getItem("products");
+      if (products) {
+        setProducts(JSON.parse(products));
+      } else {
+        setProducts([]);
+      }
     }
   }, [datosModelo, id]);
+
+  useEffect(() => {
+    //Se guarda en la memoria local
+    if (products && products.length > 0 && isNaN(Number(id))) {
+      localStorage.setItem("products", JSON.stringify(products));
+    }
+  }, [products]);
 
   async function fetchQuotationData(id) {
     try {
@@ -248,6 +263,10 @@ const QuotationForm = () => {
         ...products,
         { ...productEntry, id: Date.now(), isTemporal: false },
       ]);
+      setSelectedModel({
+        id: 0,
+        name: "Seleccionar Modelo",
+      });
       setProductEntry({ modelo: "", producto: "", cantidad: "", price: "" });
       setSeleccionarProducto([]);
       setErrors({});
@@ -549,6 +568,7 @@ const QuotationForm = () => {
           console.error("Error saving image");
         }
       }
+      localStorage.removeItem("products");
       alert("Cotizacion guardada exitosamente");
       setProducts([]);
       setDiscount(0);
@@ -569,6 +589,7 @@ const QuotationForm = () => {
 
   const handleResetForm = () => {
     setCustomerInfo({ name: "", reference: "" });
+    localStorage.removeItem("products");
     setProductEntry({ catalogo: "", modelo: "", cantidad: "" });
     setOptionalDetails({
       tiempoEntrega: "",
