@@ -20,6 +20,7 @@ const QuotationDocument = () => {
     address: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     email: "",
     phone: "",
+    firma: "",
   });
 
   const [clientInfo, setClientInfo] = useState({
@@ -81,12 +82,12 @@ const QuotationDocument = () => {
 
       setProducts(products);
 
-      //TODO agregar firma
       setCompanyDetails({
         name: "FEMCO",
         address: data.usuario?.direccion,
         email: data.usuario?.correo,
         phone: data.usuario?.telefono,
+        firma: data.usuario.firma,
       });
 
       var formaPago = "";
@@ -350,7 +351,7 @@ const QuotationDocument = () => {
         {/* image */}
         <div className="w-1/2 mr-4 relative m-auto">
           <img
-            src="../../firmaDefinitva.png"
+            src={BACKEND_URL + "/uploads/firmas/" + companyDetails.firma}
             alt="firma"
             className="h-30 w-40 m-auto absolute left-1/2 bottom-px transform -translate-x-1/2 z-0"
           />
