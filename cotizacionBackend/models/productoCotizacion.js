@@ -1,8 +1,12 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
     const ProductoCotizacion = sequelize.define('producto_cotizacion', {
         cantidad: {
-            type: DataTypes.INTEGER,
+            type: Sequelize.INTEGER,
             allowNull: false,
+            defaultValue: 1
+        },
+        item: {
+            type: Sequelize.INTEGER,
             defaultValue: 1
         }
     })

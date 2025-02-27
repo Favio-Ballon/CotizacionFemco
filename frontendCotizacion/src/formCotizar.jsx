@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaTrash, FaEdit, FaPrint, FaSave, FaPlus } from "react-icons/fa";
+import {
+  FaTrash,
+  FaEdit,
+  FaPrint,
+  FaSave,
+  FaPlus,
+  FaArrowUp,
+  FaArrowDown,
+} from "react-icons/fa";
 import ProductInputModal from "./components/cotizar/overlayProductoTemporal.jsx";
 import { BACKEND_URL } from "./main.jsx";
 import Select from "react-select";
@@ -284,13 +292,30 @@ const QuotationForm = () => {
 
   const handleEditProduct = (catalogo) => {
     const producto = products.find((p) => p.catalogo === catalogo);
+    console.log(producto);
     if (producto.isTemporal) {
       setProductTemporal(producto);
       handleRemoveProduct(catalogo);
       setModalProductoTemporal(true);
       return;
     }
-    setProductEntry(producto);
+    setProductEntry({
+      ...productEntry,
+      catalogo: producto.catalogo,
+      modelo: producto.modelo,
+      producto: producto.producto,
+      price: producto.precio,
+      cantidad: producto.cantidad
+    });
+    setSelectedModel({
+      id: producto.modelo.id,
+      name: producto.modelo,
+    });
+    const productoSeleccionado = {
+      catalogo: producto.catalogo,
+      nombre: producto.producto,
+    };
+    setSeleccionarProducto([productoSeleccionado]);
     handleRemoveProduct(catalogo);
 
     setSeleccionarProducto([
@@ -473,6 +498,7 @@ const QuotationForm = () => {
     };
 
     //add products to cotizacion first catalogo then quantity like [1,2]
+    let item = 0;
     await Promise.all(
       products.map(async (producto) => {
         //Se crea los productos temporales
@@ -503,6 +529,7 @@ const QuotationForm = () => {
                   cotizacion.productos.push([
                     producto.catalogo,
                     producto.cantidad,
+                    item,
                   ]);
                 }
               })
@@ -511,8 +538,13 @@ const QuotationForm = () => {
               });
           } else {
             console.log(producto.catalogo);
-            cotizacion.productos.push([producto.catalogo, producto.cantidad]);
+            cotizacion.productos.push([
+              producto.catalogo,
+              producto.cantidad,
+              item,
+            ]);
           }
+          item++;
         } else {
           console.error("products is not an array or is undefined");
         }
@@ -570,10 +602,12 @@ const QuotationForm = () => {
       }
       localStorage.removeItem("products");
       alert("Cotizacion guardada exitosamente");
-      setProducts([]);
       setDiscount(0);
+      setProducts([]);
       Navigate(`/cotizacion/${data.id}`);
-      window.location.reload();
+      fetchQuotationData(id);
+      // window.location.reload();
+      //
     }
 
     console.log(response);
@@ -604,6 +638,28 @@ const QuotationForm = () => {
     setSeleccionarProducto([]);
     setIsClearModalOpen(false);
     Navigate("/cotizacion/new");
+  };
+
+  const handleMoveUp = (index) => {
+    if (index > 0) {
+      const newProducts = [...products];
+      [newProducts[index], newProducts[index - 1]] = [
+        newProducts[index - 1],
+        newProducts[index],
+      ];
+      setProducts(newProducts); // Actualiza el estado de los productos
+    }
+  };
+
+  const handleMoveDown = (index) => {
+    if (index < products.length - 1) {
+      const newProducts = [...products];
+      [newProducts[index], newProducts[index + 1]] = [
+        newProducts[index + 1],
+        newProducts[index],
+      ];
+      setProducts(newProducts); // Actualiza el estado de los productos
+    }
   };
 
   return (
@@ -916,14 +972,14 @@ const QuotationForm = () => {
                         Total
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
+                        Acciones
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {products.map((producto) => (
+                    {products.map((producto, index) => (
                       <tr key={producto.catalogo}>
-                        <td className="px-6 py-4 text-center  whitespace-nowrap">
+                        <td className="px-6 py-4 text-center whitespace-nowrap">
                           {producto.catalogo}
                         </td>
                         <td className="px-2 text-center py-4 whitespace-wrap">
@@ -943,6 +999,18 @@ const QuotationForm = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleMoveUp(index)}
+                              className="text-gray-600 hover:text-gray-900"
+                            >
+                              <FaArrowUp />
+                            </button>
+                            <button
+                              onClick={() => handleMoveDown(index)}
+                              className="text-gray-600 hover:text-gray-900"
+                            >
+                              <FaArrowDown />
+                            </button>
                             <button
                               onClick={() =>
                                 handleEditProduct(producto.catalogo)

@@ -24,11 +24,12 @@ exports.listCotizacionById = (req, res) => {
             include: [
                 {
                     association: 'productos',
-                    include: ['modelo']
+                    include: ['modelo'],
+                    through: { attributes: ['cantidad', 'item'] }
                 },
                 'usuario'
-
-            ]
+            ],
+            order: [['productos', db.productoCotizacion, 'item', 'ASC']]
         })
         .then((data) => {
             if (data) {
@@ -176,11 +177,10 @@ exports.deleteCotizacion = async (req, res) => {
 
 async function setProductos(cotizacionId, productoIds) {
     const cotizacion = await db.cotizacion.findByPk(cotizacionId)
-
     productoIds.forEach(async (productoId) => {
         const producto = await db.producto.findByPk(productoId[0])
         cotizacion.addProducto(producto, {
-            through: { cantidad: productoId[1] }
+            through: { cantidad: productoId[1], item: productoId[2] }
         })
     })
 }

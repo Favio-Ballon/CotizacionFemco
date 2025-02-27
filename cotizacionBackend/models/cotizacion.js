@@ -37,7 +37,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         agregado: {
             type: Sequelize.DOUBLE
-        }
+        },
     })
     return Cotizacion
 }

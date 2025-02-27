@@ -191,6 +191,7 @@ exports.createProductoWeb = async (req, res) => {
                 })
         })
         .catch((err) => {
+            console.log(err)
             res.status(500).send({
                 message: err.message || 'Ocurrió un error al crear el producto.'
             })

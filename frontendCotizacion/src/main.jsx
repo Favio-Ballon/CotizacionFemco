@@ -1,5 +1,5 @@
 // http://localhost:3000  || https://api.cotizafemco.com
-export const BACKEND_URL = "https://api.cotizafemco.com";
+export const BACKEND_URL = "http://localhost:3000";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -16,6 +16,7 @@ import ProductManagement from "./listProductos.jsx";
 import QuotationList from "./listCotizaciones.jsx";
 import Sidebar from "./components/sidebar.jsx";
 import LoginPage from "./login.jsx";
+import QuoteMetricsDashboard from "./dashboard.jsx";
 
 const MainLayout = ({ children }) => (
   <div>
@@ -72,6 +73,14 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
+  },
+  {
+    path: "/dashboard",
+    element: (
+      <MainLayout>
+        <QuoteMetricsDashboard />
+      </MainLayout>
+    ),
   },
   {
     path: "*",

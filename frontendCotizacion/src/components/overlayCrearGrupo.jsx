@@ -281,7 +281,7 @@ const CrearGrupoOverlay = ({ isOpen, onClose, grupo }) => {
                       value={Number(searchTerm) ? searchTerm : ""}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-10 p-2 border border-gray-300 rounded-md"
-                      placeholder="Search products..."
+                      placeholder="Buscar productos..."
                     />
                   </div>
                   <div className="flex-grow overflow-y-auto">
@@ -309,7 +309,7 @@ const CrearGrupoOverlay = ({ isOpen, onClose, grupo }) => {
 
                 <div className="flex flex-col">
                   <h3 className="text-lg font-semibold mb-3">
-                    Selected Products
+                    Productos seleccionados
                   </h3>
                   <div className="flex-grow overflow-y-auto">
                     {selectedProducts.map((product) => (

@@ -16,6 +16,7 @@ db.modelo = require('./modelo.js')(sequelize, Sequelize)
 db.usuario = require('./usuario.js')(sequelize, Sequelize)
 db.cotizacion = require('./cotizacion.js')(sequelize, Sequelize)
 db.productoGrupo = require('./productoGrupo.js')(sequelize, Sequelize)
+db.productoCotizacion = require('./productoCotizacion.js')(sequelize, Sequelize)
 
 //producto tiene modelo
 db.producto.belongsTo(db.modelo, {
@@ -39,16 +40,14 @@ db.grupo.belongsToMany(db.producto, {
     foreignKey: 'grupoId'
 })
 
-const ProductoCotizacion = require('./productoCotizacion')(sequelize, Sequelize)
-
 //producto tiene cotizaciones
 db.producto.belongsToMany(db.cotizacion, {
-    through: ProductoCotizacion,
+    through: db.productoCotizacion,
     as: 'cotizaciones',
     foreignKey: 'productoId'
 })
 db.cotizacion.belongsToMany(db.producto, {
-    through: ProductoCotizacion,
+    through: db.productoCotizacion,
     as: 'productos',
     foreignKey: 'cotizacionId'
 })
