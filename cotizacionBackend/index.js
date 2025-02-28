@@ -16,6 +16,7 @@ app.use(
 var corsOptions = {
     origin: [
         'https://www.cotizafemco.com',
+        /\.cotizafemco\.com$/,
         'https://github.com',
         'http://localhost:5173'
     ] // Allow frontend & GitHub
@@ -43,15 +44,9 @@ db.sequelize
 require('./routes')(app)
 
 //make static files available
-app.use(
-    '/uploads/cotizacion',
-    express.static('uploads/cotizacion')
-)
+app.use('/uploads/cotizacion', express.static('uploads/cotizacion'))
 
-app.use(
-    '/uploads/firmas',
-    express.static('uploads/firmas')
-)
+app.use('/uploads/firmas', express.static('uploads/firmas'))
 
 app.post('/webhook', (req, res) => {
     console.log('Webhook received from GitHub')
