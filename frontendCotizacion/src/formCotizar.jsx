@@ -12,7 +12,6 @@ import {
 import ProductInputModal from "./components/cotizar/overlayProductoTemporal.jsx";
 import { BACKEND_URL } from "./main.jsx";
 import Select from "react-select";
-import InventorySelectionOverlay from "./components/cotizar/overlayGrupo.jsx";
 import GrupoOverlay from "./components/cotizar/overlayGrupo.jsx";
 
 const QuotationForm = () => {
@@ -255,6 +254,7 @@ const QuotationForm = () => {
   };
 
   const handleAddProduct = () => {
+    console.log(productEntry);
     if (validateProduct()) {
       const existingProduct = products.find(
         (p) =>
@@ -304,7 +304,7 @@ const QuotationForm = () => {
       catalogo: producto.catalogo,
       modelo: producto.modelo,
       producto: producto.producto,
-      price: producto.precio,
+      price: producto.price,
       cantidad: producto.cantidad,
     });
     setSelectedModel({
@@ -315,15 +315,10 @@ const QuotationForm = () => {
       catalogo: producto.catalogo,
       nombre: producto.producto,
     };
+
+    console.log(productoSeleccionado);
     setSeleccionarProducto([productoSeleccionado]);
     handleRemoveProduct(catalogo);
-
-    setSeleccionarProducto([
-      {
-        catalogo: producto.catalogo,
-        name: producto.producto,
-      },
-    ]);
   };
 
   const handleCatalago = (e) => {
