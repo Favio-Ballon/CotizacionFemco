@@ -14,5 +14,7 @@ module.exports = (app) => {
     //imagen
     router.post('/upload/:id', controller.addOrUpdateImage)
 
+    router.post('/dashboard/facturas',authMiddleware, controller.dashboardFacturas)
+
     app.use('/cotizacion', router)
 }

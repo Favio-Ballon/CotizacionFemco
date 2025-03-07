@@ -12,7 +12,9 @@ module.exports = (app) => {
     router.delete('/:id', controller.deleteUsuario)
 
     router.post('/login', controller.login)
-    router.post('/firma/upload', authMiddleware ,controller.uploadFirma)
+    router.post('/firma/upload', authMiddleware, controller.uploadFirma)
+
+    router.post('/dashboard', authMiddleware, controller.getPHPSESSID)
 
     app.use('/usuario', router)
 }

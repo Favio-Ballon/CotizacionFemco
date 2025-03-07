@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import {
   FaChartLine,
   FaFileInvoiceDollar,
-  FaCalendarAlt,
   FaDownload,
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -38,7 +37,7 @@ const QuoteMetricsDashboard = () => {
       try {
         const response = await fetch(`${BACKEND_URL}/cotizacion`, {
           headers: {
-            Authorization: `Bearer ${token}`, // Reemplaza con tu token Bearer
+            Authorization: `Bearer ${token}`,
           },
         });
         const data = await response.json();
@@ -90,7 +89,7 @@ const QuoteMetricsDashboard = () => {
     return dateRange.map((date) => ({
       date,
       cantidadCotizado: dataByDate[date]?.cantidadCotizado || 0,
-      valorCotizado: dataByDate[date]?.valorCotizado || 0,
+      valorCotizado: parseFloat((dataByDate[date]?.valorCotizado || 0).toFixed(2)),
     }));
   }, [quoteData, startDate, endDate]);
 

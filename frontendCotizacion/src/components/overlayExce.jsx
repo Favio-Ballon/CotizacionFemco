@@ -39,7 +39,7 @@ const ExcelInputModal = ({ isOpen, onClose, onSubmit }) => {
   const validateForm = () => {
     const newErrors = {};
     if (!excel) {
-      newErrors.excel = "El archivo es requerida";
+      newErrors.excel = "El archivo es requerido";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

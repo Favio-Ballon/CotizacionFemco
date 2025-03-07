@@ -17,6 +17,7 @@ import QuotationList from "./listCotizaciones.jsx";
 import Sidebar from "./components/sidebar.jsx";
 import LoginPage from "./login.jsx";
 import QuoteMetricsDashboard from "./dashboard.jsx";
+import BillMetricsDashboard from "./dashboardFacturas.jsx";
 
 const MainLayout = ({ children }) => (
   <div>
@@ -79,6 +80,14 @@ const router = createBrowserRouter([
     element: (
       <MainLayout>
         <QuoteMetricsDashboard />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/facturas",
+    element: (
+      <MainLayout>
+        <BillMetricsDashboard />
       </MainLayout>
     ),
   },

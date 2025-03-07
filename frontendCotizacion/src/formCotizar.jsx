@@ -305,7 +305,7 @@ const QuotationForm = () => {
       modelo: producto.modelo,
       producto: producto.producto,
       price: producto.precio,
-      cantidad: producto.cantidad
+      cantidad: producto.cantidad,
     });
     setSelectedModel({
       id: producto.modelo.id,
@@ -497,7 +497,7 @@ const QuotationForm = () => {
       agregado: agregado ? agregado : 0,
     };
 
-    //add products to cotizacion first catalogo then quantity like [1,2]
+    //Se agrega los productos a la cotizacion [id,cantidad,item]
     let item = 0;
     await Promise.all(
       products.map(async (producto) => {

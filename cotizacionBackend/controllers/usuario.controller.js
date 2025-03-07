@@ -254,3 +254,34 @@ const uploadFirmaImagen = (req, res) => {
         return fileName
     }
 }
+
+exports.getPHPSESSID = async (req, res) => {
+    try {
+        const response = await fetch(
+            `http://181.177.141.171/pos/bin/modelo.php`,
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    accion: 24,
+                    usr: 'Ventas-SP',
+                    pswd: 'VSP5370',
+                    middleware: 'Femco',
+                    url: 'http://localhost:80/Femco/api/web/',
+                    base: 'pos_1',
+                    equipo: 'VENTAS-SP1'
+                }),
+                credentials: 'include'
+            }
+        )
+        const cookies = response.headers.get('set-cookie')
+        const match = cookies.match(/PHPSESSID=([^;]+);/)
+        const PHPSESSID = match ? match[1] : null
+        console.log(PHPSESSID)
+        res.send({ PHPSESSID })
+    } catch (err) {
+        console.log(err)
+        res.status(500).send({
+            message: err.message || 'Ocurrió un error al obtener las facturas.'
+        })
+    }
+}

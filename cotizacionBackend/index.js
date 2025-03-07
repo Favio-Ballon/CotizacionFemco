@@ -43,11 +43,11 @@ db.sequelize
 
 require('./routes')(app)
 
-//make static files available
+//static files
 app.use('/uploads/cotizacion', express.static('uploads/cotizacion'))
-
 app.use('/uploads/firmas', express.static('uploads/firmas'))
 
+//webhook para actualizar el servidor
 app.post('/webhook', (req, res) => {
     console.log('Webhook received from GitHub')
 

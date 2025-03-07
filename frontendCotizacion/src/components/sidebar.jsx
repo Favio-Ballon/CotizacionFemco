@@ -7,6 +7,7 @@ import {
   FiPackage,
   FiArchive,
   FiInfo,
+  FiDollarSign,
   FiLogOut,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
@@ -66,7 +67,7 @@ const Sidebar = () => {
     }
     try {
       const decodedToken = jwtDecode(token);
-      const currentTime = Date.now() / 1000; // current time in seconds
+      const currentTime = Date.now() / 1000; // Tiempo en segundos
       setNombre(decodedToken.nombre);
       setCorreo(decodedToken.correo);
       if (decodedToken.exp < currentTime) {
@@ -86,6 +87,7 @@ const Sidebar = () => {
       { id: "productos", label: "Productos", icon: FiPackage },
       { id: "cotizaciones", label: "Cotizaciones", icon: FiArchive },
       { id: "dashboard", label: "Dashboard", icon: FiInfo },
+      { id: "facturas", label: "Facturas", icon: FiDollarSign },
       { id: "logout", label: "Cerrar sesión", icon: FiLogOut },
     ],
     []

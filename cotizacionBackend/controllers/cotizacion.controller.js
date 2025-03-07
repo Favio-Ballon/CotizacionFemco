@@ -3,7 +3,11 @@ const { isRequestValid } = require('../utils/request.utils')
 
 exports.listCotizacion = (req, res) => {
     db.cotizacion
-        .findAll()
+        .findAll(
+            {
+                order: [['id', 'DESC']],
+            }
+        )
         .then((data) => {
             res.send(data)
         })
@@ -205,7 +209,7 @@ async function updateProductos(cotizacionId, productoIds) {
     productoIds.forEach(async (productoId) => {
         const producto = await db.producto.findByPk(productoId[0])
         cotizacion.addProducto(producto, {
-            through: { cantidad: productoId[1] }
+            through: { cantidad: productoId[1], item: productoId[2] }
         })
     })
 }
@@ -254,4 +258,34 @@ function uploadImage(req, res, cotizacion) {
         cotizacion.save()
         res.status(200).send()
     })
+}
+
+exports.dashboardFacturas = async (req, res) => {
+    try {
+        console.log(req.body);
+        const response = await fetch(
+            `http://181.177.141.171/pos/bin/modelo.php`,
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${req.body.PHPSESSID};`
+                },
+                method: 'POST',
+                body: JSON.stringify({
+                    accion: 109,
+                    usuario: req.body.usuario,
+                    tipo: 'DFA',
+                    inicio: req.body.inicio,
+                    fin: req.body.fin
+                })
+            }
+        )
+        const facturas = await response.json()
+        console.log(facturas)
+        res.send(facturas)
+    } catch (err) {
+        console.log(err)
+        res.status(500).send({
+            message: err.message || 'Ocurrió un error al obtener las facturas.'
+        })
+    }
 }

@@ -92,12 +92,12 @@ const CrearGrupoOverlay = ({ isOpen, onClose, grupo }) => {
   }, [isOpen, handleEscapeKey]);
 
   const handleAddProduct = (product) => {
-    if (selectedProducts.length >= 20) {
-      setError("Maximum product limit reached (20)");
+    if (selectedProducts.length >= 30) {
+      setError("Limite de productos alcanzado");
       return;
     }
     if (selectedProducts.some((p) => p.catalogo === product.catalogo)) {
-      setError("Product already exists in the group");
+      setError("Producto ya añadido");
       return;
     }
     setSelectedProducts([
@@ -139,7 +139,7 @@ const CrearGrupoOverlay = ({ isOpen, onClose, grupo }) => {
         (p) => p.customName === newName && p.catalogo !== productId
       )
     ) {
-      setError("Custom name must be unique");
+      setError("El nombre del producto ya existe");
       return;
     }
     setSelectedProducts(
@@ -153,14 +153,14 @@ const CrearGrupoOverlay = ({ isOpen, onClose, grupo }) => {
 
   const handleCreateGroup = () => {
     if (!groupName.trim()) {
-      setError("Group name is required");
+      setError("Nombre de grupo requerido");
       return;
     }
     if (selectedProducts.length === 0) {
-      setError("Please add at least one product");
+      setError("Seleccione al menos un producto");
       return;
     }
-    console.log("Group created:", {
+    console.log("Grupo Creado:", {
       name: groupName,
       products: selectedProducts,
     });
@@ -198,7 +198,7 @@ const CrearGrupoOverlay = ({ isOpen, onClose, grupo }) => {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to create group");
+          throw new Error("Se ha producido un error");
         }
         return response.json();
       })
@@ -206,8 +206,8 @@ const CrearGrupoOverlay = ({ isOpen, onClose, grupo }) => {
         close();
       })
       .catch((error) => {
-        console.error("Error creating group:", error);
-        setError("Failed to create group");
+        console.error("Se produjo un error:", error);
+        setError("Error al crear el grupo");
       });
   };
 
@@ -264,7 +264,7 @@ const CrearGrupoOverlay = ({ isOpen, onClose, grupo }) => {
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value.slice(0, 50))}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter group name"
+                  placeholder="Ingrese el nombre del grupo"
                   maxLength={50}
                 />
               </div>
