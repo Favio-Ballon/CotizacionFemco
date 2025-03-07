@@ -43,6 +43,8 @@ const Sidebar = () => {
       setActiveLink("cotizaciones");
     } else if (path.includes("dashboard")) {
       setActiveLink("dashboard");
+    } else if (path.includes("facturas")) {
+      setActiveLink("facturas");
     }
 
     return () => window.removeEventListener("resize", handleResize);
