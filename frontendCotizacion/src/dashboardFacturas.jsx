@@ -36,12 +36,12 @@ const BillMetricsDashboard = () => {
     { id: 15, nombre: "LP" },
     { id: 16, nombre: "LM" },
     { id: 18, nombre: "LS" },
-    {id: 5, nombre: "S/N"},
-    {id:6, nombre: "S/N"},
-    {id:14, nombre: "S/N"},
-    {id:20, nombre: "S/N"},
-    {id:21, nombre: "S/N"},
-    {id:22, nombre: "S/N"},
+    { id: 5, nombre: "S/N" },
+    { id: 6, nombre: "CH" },
+    { id: 14, nombre: "S/N" },
+    { id: 20, nombre: "S/N" },
+    { id: 21, nombre: "LA" },
+    { id: 22, nombre: "S/N" },
   ]);
   const [sucursal, setSucursal] = useState(11);
 
