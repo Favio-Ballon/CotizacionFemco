@@ -38,7 +38,7 @@ const BillMetricsDashboard = () => {
     { id: 18, nombre: "LS" },
     { id: 5, nombre: "S/N" },
     { id: 6, nombre: "CH" },
-    { id: 14, nombre: "S/N" },
+    { id: 14, nombre: "SZ" },
     { id: 20, nombre: "S/N" },
     { id: 21, nombre: "LA" },
     { id: 22, nombre: "S/N" },
