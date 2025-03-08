@@ -6,3 +6,4 @@ ecosystem.config.js
 start-backend.js
 start-frontend.js
 cotizacionBackend/uploads/firmas/1.png
+cotizacionBackend/startscript.js

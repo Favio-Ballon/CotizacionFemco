@@ -19,7 +19,11 @@ var corsOptions = {
         /\.cotizafemco\.com$/,
         'https://github.com',
         'http://localhost:5173'
-    ] // Allow frontend & GitHub
+    ], // Allow frontend & GitHub
+    METHODS: ['Get', 'Post', 'Put', 'Delete'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200,
+    credentials: true
 }
 
 app.use(cors(corsOptions))
@@ -33,6 +37,7 @@ app.use(
 )
 
 const db = require('./models')
+const { METHODS } = require('http')
 db.sequelize
     .sync({
         //force: true, // drop tables and recreate
