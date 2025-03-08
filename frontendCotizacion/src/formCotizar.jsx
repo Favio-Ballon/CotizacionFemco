@@ -621,9 +621,10 @@ const QuotationForm = () => {
     localStorage.removeItem("products");
     setProductEntry({ catalogo: "", modelo: "", cantidad: "" });
     setOptionalDetails({
-      tiempoEntrega: "",
-      formaPago: "",
+      tiempoEntrega: "3-5",
+      formaPago: "100",
       observaciones: "",
+      imagen: null,
       transporte: false,
     });
     setProducts([]);
